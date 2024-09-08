@@ -105,7 +105,7 @@ Below are the functions intended to be developed as the completion of the projec
 #### 3.2 Integration with Existing Packages
 Make sure the package checks for the presence of required packages and installs them if necessary.
 
-* Required Packages:
+* **Required Packages:**
   
   + **Rcpp:** For integrating C++ code for performance optimization.
   + **ggplot2:** For creating and customizing the Pearson diagram and comparison charts.
