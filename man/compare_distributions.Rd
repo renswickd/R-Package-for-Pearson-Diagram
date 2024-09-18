@@ -2,21 +2,18 @@
 % Please edit documentation in R/pearson_plot.R
 \name{compare_distributions}
 \alias{compare_distributions}
-\title{Compare Multiple Distributions on Pearson Diagram}
+\title{Compare multiple distributions}
 \usage{
-compare_distributions(data_list)
+compare_distributions(object, data_list)
 }
 \arguments{
-\item{data_list}{A list of numeric vectors, each representing a dataset}
+\item{object}{PearsonDiagram object}
+
+\item{data_list}{A list of numeric vectors}
 }
 \value{
-A ggplot2 object showing multiple points on the Pearson diagram
+Updated PearsonDiagram object with new points and a plot
 }
 \description{
-This function compares multiple distributions by calculating and plotting their skewness and kurtosis.
-}
-\examples{
-data1 <- rnorm(100)
-data2 <- runif(100)
-compare_distributions(list(data1, data2))
+Compare multiple distributions
 }

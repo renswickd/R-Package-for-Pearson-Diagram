@@ -15,6 +15,3 @@ TRUE if the input is valid, otherwise stops with an error
 \description{
 This function checks if the input data is valid.
 }
-\examples{
-validate_input(rnorm(100)) # Should return TRUE
-}

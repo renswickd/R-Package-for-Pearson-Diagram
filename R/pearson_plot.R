@@ -1,50 +1,83 @@
-#' Plot Pearson Diagram
+#' Create a PearsonDiagram Object
 #'
-#' This function plots the Pearson diagram based on provided skewness and kurtosis values.
+#' This function creates an empty PearsonDiagram object. The PearsonDiagram object is used to store skewness and kurtosis values and allows for plotting and comparing distributions.
 #'
-#' @param skewness The skewness of the data
-#' @param kurtosis The kurtosis of the data
-#' @return A ggplot2 object representing the Pearson diagram
+#' @return An empty PearsonDiagram object.
 #' @examples
-#' plot_pearson_diagram(0, 3) # Plot a normal distribution
+#' pd <- PearsonDiagram()
 #' @export
-plot_pearson_diagram <- function(skewness, kurtosis) {
-  # Use explicit package namespace for ggplot2 functions
-  plot_data <- data.frame(skewness = skewness, kurtosis = kurtosis)
-  p <- ggplot2::ggplot(plot_data, ggplot2::aes(x = skewness, y = kurtosis)) +
+PearsonDiagram <- function() {
+  structure(list(points = data.frame(skewness = numeric(), kurtosis = numeric())),
+            class = "PearsonDiagram")
+}
+
+# Add skewness and kurtosis points to the PearsonDiagram object
+#' Add a point to the Pearson Diagram
+#' @param object PearsonDiagram object
+#' @param skewness Skewness value of the distribution
+#' @param kurtosis Kurtosis value of the distribution
+#' @return Updated PearsonDiagram object with new points
+#' @export
+add_point <- function(object, skewness, kurtosis) {
+  UseMethod("add_point")
+}
+
+# Default S3 method for adding points to PearsonDiagram
+#' @export
+add_point.PearsonDiagram <- function(object, skewness, kurtosis) {
+  object$points <- rbind(object$points, data.frame(skewness = skewness, kurtosis = kurtosis))
+  return(object)
+}
+
+# Plot the Pearson Diagram based on stored points
+#' Plot the Pearson Diagram
+#' @param object PearsonDiagram object
+#' @return ggplot2 object representing the Pearson diagram
+#' @export
+plot_diagram <- function(object) {
+  UseMethod("plot_diagram")
+}
+
+# Plot the Pearson Diagram based on stored points
+#' Plot the Pearson Diagram
+#' @param object PearsonDiagram object
+#' @return ggplot2 object representing the Pearson diagram
+#' @export
+plot_diagram.PearsonDiagram <- function(object) {
+
+  if (nrow(object$points) == 0) {
+    stop("No points to plot. Add points to the Pearson diagram first.")
+  }
+
+  # Ensure the values are obtained directly from the data frame within the function
+  p <- ggplot2::ggplot(object$points, ggplot2::aes(x = object$points$skewness, y = object$points$kurtosis)) +
     ggplot2::geom_point(color = "blue") +
     ggplot2::xlab("Skewness") + ggplot2::ylab("Kurtosis") +
     ggplot2::ggtitle("Pearson Diagram")
+
   print(p)
   return(p)
 }
 
-#' Compare Multiple Distributions on Pearson Diagram
-#'
-#' This function compares multiple distributions by calculating and plotting their skewness and kurtosis.
-#'
-#' @param data_list A list of numeric vectors, each representing a dataset
-#' @return A ggplot2 object showing multiple points on the Pearson diagram
-#' @examples
-#' data1 <- rnorm(100)
-#' data2 <- runif(100)
-#' compare_distributions(list(data1, data2))
+# Compare multiple distributions by adding them to the Pearson Diagram
+#' Compare multiple distributions
+#' @param object PearsonDiagram object
+#' @param data_list A list of numeric vectors
+#' @return Updated PearsonDiagram object with new points and a plot
 #' @export
-compare_distributions <- function(data_list) {
-  results <- data.frame(skewness = numeric(), kurtosis = numeric())
+compare_distributions <- function(object, data_list) {
+  UseMethod("compare_distributions")
+}
 
+# Default S3 method for comparing distributions
+#' @export
+compare_distributions.PearsonDiagram <- function(object, data_list) {
   for (data in data_list) {
     sk_kt <- cpp_calculate_skewness_kurtosis(data)
-    results <- rbind(results, data.frame(skewness = sk_kt[1], kurtosis = sk_kt[2]))
+    object <- add_point(object, sk_kt[1], sk_kt[2])
   }
-
-  p <- ggplot2::ggplot(results, ggplot2::aes(x = sk_kt[1], y = sk_kt[2])) +
-    ggplot2::geom_point(color = "red") +
-    ggplot2::xlab("Skewness") + ggplot2::ylab("Kurtosis") +
-    ggplot2::ggtitle("Comparison of Distributions")
-
-  print(p)
-  return(p)
+  plot_diagram(object)
+  return(object)
 }
 
 #' Calculate Skewness and Kurtosis Using Rcpp
