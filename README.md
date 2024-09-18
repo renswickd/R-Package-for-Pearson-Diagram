@@ -6,7 +6,23 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of pearson.diagram is to …
+The Pearson Diagram R package provides tools to visualize distributions
+using Pearson Diagrams. It helps users calculate skewness and kurtosis
+for unknown data distributions, plot the Pearson Diagram, and compare
+multiple distributions. This package leverages **Rcpp** for efficient
+computation and follows the **S3** object-oriented programming paradigm
+in R.
+
+## Key Features
+
+- **Plotting Pearson Diagrams:** Visualize distributions on a Pearson
+  Diagram by plotting skewness and kurtosis.
+- **Comparison of Multiple Distributions:** Compute and compare skewness
+  and kurtosis for multiple distributions.
+- **Efficient Calculation with Rcpp:** Uses C++ for high-performance
+  calculation of skewness and kurtosis.
+- **S3 Object-Oriented Programming:** Encapsulates functionality within
+  S3 classes for Pearson Diagrams.
 
 ## Installation
 
