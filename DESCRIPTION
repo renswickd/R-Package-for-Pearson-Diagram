@@ -4,7 +4,7 @@ Title: What the Package Does (Title Case)
 Version: 0.1.0
 Author: Who wrote it
 Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
+Description: The Pearson Diagram R package provides tools to visualize distributions using Pearson Diagrams.
     Use four spaces when indenting paragraphs within the Description.
 License: MIT + file LICENSE
 Encoding: UTF-8

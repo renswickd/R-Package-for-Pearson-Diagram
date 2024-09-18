@@ -1,4 +1,3 @@
-// src/skewness_kurtosis.cpp
 #include <Rcpp.h>
 using namespace Rcpp;
 

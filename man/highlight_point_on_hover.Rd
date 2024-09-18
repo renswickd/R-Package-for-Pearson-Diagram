@@ -10,7 +10,7 @@ highlight_point_on_hover(point)
 \item{point}{A ggplot2 object with points plotted on it}
 }
 \value{
-A modified ggplot2 object with tooltip functionality
+A modified ggplot2 object
 }
 \description{
 This function adds interactive tooltip functionality to Pearson diagram plots.

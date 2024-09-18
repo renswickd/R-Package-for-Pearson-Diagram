@@ -17,5 +17,5 @@ add_point(object, skewness, kurtosis)
 Updated PearsonDiagram object with new points
 }
 \description{
-Add a point to the Pearson Diagram
+It adds point to the pearson diagram
 }
