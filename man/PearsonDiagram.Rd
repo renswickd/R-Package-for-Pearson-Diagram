@@ -10,7 +10,8 @@ PearsonDiagram()
 An empty PearsonDiagram object.
 }
 \description{
-This function creates an empty PearsonDiagram object. The PearsonDiagram object is used to store skewness and kurtosis values and allows for plotting and comparing distributions.
+This function creates an empty PearsonDiagram object. The PearsonDiagram object is used to store
+skewness and kurtosis values and allows for plotting and comparing distributions.
 }
 \examples{
 pd <- PearsonDiagram()

@@ -9,10 +9,10 @@ Description: The Pearson Diagram R package provides tools to visualize distribut
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
-Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
 Imports:
     Rcpp (>= 1.0.6),
-    ggplot2
+    ggplot2,
+    stats
 LinkingTo: 
     Rcpp

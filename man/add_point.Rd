@@ -4,7 +4,7 @@
 \alias{add_point}
 \title{Add a point to the Pearson Diagram}
 \usage{
-add_point(object, skewness, kurtosis)
+add_point(object, skewness, kurtosis, distribution)
 }
 \arguments{
 \item{object}{PearsonDiagram object}
@@ -12,10 +12,12 @@ add_point(object, skewness, kurtosis)
 \item{skewness}{Skewness value of the distribution}
 
 \item{kurtosis}{Kurtosis value of the distribution}
+
+\item{distribution}{Name of the distribution}
 }
 \value{
 Updated PearsonDiagram object with new points
 }
 \description{
-It adds point to the pearson diagram
+This function adds a new point (skewness and kurtosis) to the Pearson diagram for a given distribution.
 }
