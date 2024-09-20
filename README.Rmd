@@ -18,37 +18,28 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of pearson.diagram is to ...
+The Pearson Diagram R package provides tools to visualize distributions using Pearson Diagrams. It helps users calculate skewness and kurtosis for unknown data distributions, plot the Pearson Diagram, and compare multiple distributions. This package leverages **Rcpp** for efficient computation and follows the **S3** object-oriented programming paradigm in R.
 
-## Installation
+## Key Features
 
-You can install the development version of pearson.diagram like so:
+- **Plotting Pearson Diagrams:** Visualize distributions on a Pearson Diagram by plotting skewness and kurtosis.
+- **Comparison of Multiple Distributions:** Compute and compare skewness and kurtosis for multiple distributions.
+- **Plot the unknown data:** Allows users to include an unknown data in the Pearson Diagram and helps to identify the distribution.
+- **Efficient Calculation with Rcpp:** Uses C++ for high-performance calculation of skewness and kurtosis.
+- **S3 Object-Oriented Programming:** Encapsulates functionality within S3 classes for Pearson Diagrams.
+
+
+
+## To validate the build status
+Clone the repository to local folder and run the below codes
 
 ``` r
-# FILL THIS IN! HOW CAN PEOPLE INSTALL YOUR DEV PACKAGE?
+library(devtools)
 ```
 
-## Example
-
-This is a basic example which shows you how to solve a common problem:
-
-```{r example}
-library(pearson.diagram)
-## basic example code
+Work on the below command to check if the package is build successfully.
+```{r}
+devtools::check()
+devtools::check(document = TRUE)
+# devtools::check(document = TRUE, manual = TRUE)
 ```
-
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
-
-```{r cars}
-summary(cars)
-```
-
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this.
-
-You can also embed plots, for example:
-
-```{r pressure, echo = FALSE}
-plot(pressure)
-```
-
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
