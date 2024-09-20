@@ -45,7 +45,7 @@ add_point.PearsonDiagram <- function(object, skewness, kurtosis, distribution) {
 #' @param data A numeric vector representing the unknown distribution
 #' @return Updated PearsonDiagram object with the unknown distribution point added
 #' @export
-add_unknown_distribution <- function(object, data) {
+add_unknown_data <- function(object, data) {
 
   validate_input(data)
 
@@ -157,8 +157,6 @@ compare_multiple_distributions <- function(object, n_samples = 100, sample_size 
   plot_diagram(object)
   return(object)
 }
-
-
 
 #' Calculate Skewness and Kurtosis Using Rcpp
 #'
