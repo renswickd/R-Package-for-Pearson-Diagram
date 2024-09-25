@@ -15,7 +15,7 @@ NumericVector cpp_calculate_skewness_kurtosis(NumericVector data) {
     kurtosis += pow((data[i] - mean) / sd, 4);
   }
   skewness = skewness / n;
-  kurtosis = (kurtosis / n) - 3;
+  kurtosis = (kurtosis / n);
 
   return NumericVector::create(skewness, kurtosis);
 }

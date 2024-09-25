@@ -1,0 +1,92 @@
+---
+title: "plot_pearson_diagram"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{plot_pearson_diagram}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+### Vignette for the Pearson Diagram Package
+# Pearson Diagram: Skewness and Kurtosis Visualization of Distributions
+Hello and welcome to the Pearson Diagram Package Vignette! This software demonstrates several distributions on a Pearson Diagram by plotting their skewness and kurtosis. For efficient calculation and visualization, the package makes use of base R, ggplot2, and Rcpp. This vignette will walk you through how to use the functions included with this package.
+
+## Installation
+If the package is not yet installed, you can install it using:
+
+```
+install_github("renswickd/R-Package-for-Pearson-Diagram")
+```
+## Loading the Package
+```{r setup}
+library(pearson.diagram) 
+```
+
+## 1. Creating a `PearsonDiagram` Object
+A `PearsonDiagram` object is the fundamental object used to store the square of skewness, kurtosis, and the corresponding distribution information. The `PearsonDiagram` object initially contains no points but can be populated by adding distributions or custom data points.
+```{r}
+# Create a new PearsonDiagram object
+pd <- PearsonDiagram()
+print(pd)
+```
+## 2. Using `cpp_calculate_moments` to Calculate Skewness and Kurtosis for unknown data (Input data)
+For custom datasets, the package includes the cpp_calculate_moments() function, which leverages Rcpp to efficiently compute the square of skewness and kurtosis.
+```{r}
+# Generate some random data
+data <- rnorm(1000)
+
+# Calculate moments (square of skewness and kurtosis)
+moments <- cpp_calculate_moments(data)
+print(moments)
+```
+
+## 3. Adding Points to the Pearson Diagram
+You can add data points to the `PearsonDiagram` object. These points indicate the skewness and kurtosis of a data provided by the user. The `add_point()` function lets you add a point representing the distribution of the input data. The `add_point()` function updates the `PearsonDiagram` object, appending the provided data points.
+```{r}
+# Add a point with skewness and kurtosis
+
+pd <- PearsonDiagram()
+
+data <- rnorm(1000)
+moments <- cpp_calculate_moments(data)
+
+pd <- add_point(pd, sq_skewness = moments$sq_skewness, kurtosis = moments$kurtosis, distribution = "Input data") # parameter distribution is `optional`
+
+print(pd$points)
+```
+
+## 4. Visualizing Known and Custom Distributions on the Pearson Diagram
+The `plot_diagram()` function allows you to visualize different distributions on a Pearson Diagram. You can compare known distributions `(Normal, Exponential, Gamma, Beta)` with custom data points.
+
+```{r}
+plot_diagram(pd)
+```
+The `plot_diagram()` function generates a diagram showing different distribution families and custom data points. Each family can be represented as:
+
+* *Point (e.g., Normal, Uniform)*
+* *Line (e.g., Exponential, Gamma)*
+* *Area (e.g., Beta)*
+
+## 5. Visualizing multiple Inputs on Pearson Plot
+
+```{r}
+pd <- PearsonDiagram()
+
+norm_data <- rnorm(10000)
+gamma_data <- rgamma(10000, shape=3)
+
+norm_moments <- cpp_calculate_moments(norm_data)
+gamma_moments <- cpp_calculate_moments(gamma_data)
+
+pd <- add_point(pd, sq_skewness = norm_moments$sq_skewness, kurtosis = norm_moments$kurtosis) 
+pd <- add_point(pd, sq_skewness = gamma_moments$sq_skewness, kurtosis = gamma_moments$kurtosis)
+
+plot_diagram(pd)
+```

@@ -96,13 +96,13 @@ plot_diagram.PearsonDiagram <- function(object) {
 
     # Legend and title
     ggplot2::ggtitle("Pearson Diagram with Different Distribution Families") +
-    ggplot2::scale_color_manual(name = "Point & Line Representations",  # Custom legend title
+    ggplot2::scale_color_manual(name = "Points & Lines",  # Custom legend title
                                 values = c("Normal" = "skyblue",
                                            "Uniform" = "lightgreen",
                                            "Exponential" = "lightcoral",
                                            "Gamma" = "plum",
                                            "Beta" = "lightsalmon")) +
-    ggplot2::scale_fill_manual(name= "Area Representations", values = c("Beta" = "lightsalmon")) +
+    ggplot2::scale_fill_manual(name= "Area", values = c("Beta" = "lightsalmon")) +
     ggplot2::theme_minimal()
 
   print(p)
