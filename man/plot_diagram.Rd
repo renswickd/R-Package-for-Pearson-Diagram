@@ -4,14 +4,21 @@
 \alias{plot_diagram}
 \title{Plot the Pearson Diagram}
 \usage{
-plot_diagram(object)
+plot_diagram(object, data = NULL, bootstrap = FALSE, hover = FALSE)
 }
 \arguments{
 \item{object}{A PearsonDiagram object.}
+
+\item{data}{Optional input data for which moments (skewness, kurtosis) will be calculated.}
+
+\item{bootstrap}{Boolean indicating if bootstrap should be applied (default is FALSE).}
+
+\item{hover}{Boolean indicating if hover functionality should be enabled (default is FALSE).}
 }
 \value{
 A ggplot2 object representing the Pearson diagram.
 }
 \description{
-This function plots the Pearson diagram with known distributions and added points.
+This function plots the Pearson diagram, calculates moments if input data is provided,
+and adds bootstrap functionality.
 }
