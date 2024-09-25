@@ -7,11 +7,11 @@
 plot_diagram(object)
 }
 \arguments{
-\item{object}{PearsonDiagram object}
+\item{object}{A PearsonDiagram object.}
 }
 \value{
-ggplot2 object representing the Pearson diagram
+A ggplot2 object representing the Pearson diagram.
 }
 \description{
-Plot the Pearson Diagram
+This function plots the Pearson diagram with known distributions and added points.
 }

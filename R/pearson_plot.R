@@ -1,162 +1,114 @@
 #' Create a PearsonDiagram Object
 #'
-#' This function creates an empty PearsonDiagram object. The PearsonDiagram object is used to store
-#' skewness and kurtosis values and allows for plotting and comparing distributions.
+#' This function creates an empty PearsonDiagram object.
+#' The PearsonDiagram object is used to store sq_skewness, kurtosis values, and distribution.
 #'
-#' @return An empty PearsonDiagram object.
+#' @return A PearsonDiagram object.
 #' @export
-#'
 #' @examples
 #' pd <- PearsonDiagram()
 PearsonDiagram <- function() {
-  structure(list(points = data.frame(skewness = numeric(), kurtosis = numeric(), distribution = character())),
-            class = "PearsonDiagram")
+  structure(
+    list(points = data.frame(sq_skewness = numeric(), kurtosis = numeric(), distribution = character())),
+    class = "PearsonDiagram"
+  )
 }
 
 #' Add a point to the Pearson Diagram
 #'
-#' This function adds a new point (skewness and kurtosis) to the Pearson diagram for a given distribution.
+#' Adds a point with the given sq_skewness and kurtosis values.
 #'
 #' @param object PearsonDiagram object
-#' @param skewness Skewness value of the distribution
+#' @param sq_skewness Square of skewness value of the distribution
 #' @param kurtosis Kurtosis value of the distribution
-#' @param distribution Name of the distribution
+#' @param distribution The name of the distribution
 #' @return Updated PearsonDiagram object with new points
 #' @export
-add_point <- function(object, skewness, kurtosis, distribution) {
+add_point <- function(object, sq_skewness, kurtosis, distribution=NA) {
   UseMethod("add_point")
 }
 
-#' @export
-add_point.PearsonDiagram <- function(object, skewness, kurtosis, distribution) {
-  object$points <- rbind(object$points,
-                         data.frame(skewness = skewness,
-                                    kurtosis = kurtosis,
-                                    distribution = distribution))
-  return(object)
-}
-
-#' Add Unknown Distribution to Pearson Diagram
-#'
-#' This function calculates the skewness and kurtosis for an unknown distribution and adds it to the Pearson diagram.
-#' The unknown distribution is plotted as a black "X" on the diagram.
+#' Add a point to the Pearson Diagram
 #'
 #' @param object PearsonDiagram object
-#' @param data A numeric vector representing the unknown distribution
-#' @return Updated PearsonDiagram object with the unknown distribution point added
+#' @param sq_skewness Square of skewness value of the distribution
+#' @param kurtosis Kurtosis value of the distribution
+#' @param distribution The name of the distribution
+#' @return Updated PearsonDiagram object with new points
 #' @export
-add_unknown_data <- function(object, data) {
-
-  validate_input(data)
-
-  sk_kt <- cpp_calculate_skewness_kurtosis(data)
-  object$points <- rbind(object$points,
-                         data.frame(skewness = sk_kt[1],
-                                    kurtosis = sk_kt[2],
-                                    distribution = "Unknown"))
-
-  # Plot the diagram with the new unknown distribution
-  plot_diagram_with_unknown(object)
+add_point.PearsonDiagram <- function(object, sq_skewness, kurtosis, distribution=NA) {
+  object$points <- rbind(
+    object$points,
+    data.frame(sq_skewness = sq_skewness, kurtosis = kurtosis, distribution = distribution)
+  )
   return(object)
 }
-
 
 #' Plot the Pearson Diagram
-#' @param object PearsonDiagram object
-#' @return ggplot2 object representing the Pearson diagram
+#'
+#' This function plots the Pearson diagram with known distributions and added points.
+#' @param object A PearsonDiagram object.
+#' @return A ggplot2 object representing the Pearson diagram.
 #' @export
 plot_diagram <- function(object) {
   UseMethod("plot_diagram")
 }
 
-#' Plot the Pearson Diagram
-#' @param object PearsonDiagram object
-#' @return ggplot2 object representing the Pearson diagram
 #' @export
 plot_diagram.PearsonDiagram <- function(object) {
+
   if (nrow(object$points) == 0) {
     stop("No points to plot. Add points to the Pearson diagram first.")
   }
 
-  # Plot the points with colors based on distribution
-  p <- ggplot2::ggplot(object$points, ggplot2::aes(x = object$points$skewness, y = object$points$kurtosis, color = object$points$distribution)) +
-    ggplot2::geom_point(size = 1) +
-    ggplot2::xlab("Skewness") +
-    ggplot2::ylab("Kurtosis") +
-    ggplot2::ggtitle("Pearson Diagram") +
-    ggplot2::scale_color_manual(values = c("Normal" = "blue", "Exponential" = "red",
-                                           "Uniform" = "green", "Beta" = "orange",
-                                           "Gamma" = "purple")) +
+  # Generate known distributions' data
+  data <- generate_data()
+
+  point_data <- data[data$distribution %in% c("Normal", "Uniform"), ]
+  exp_line_data <- data[data$distribution == "Exponential", ]
+  gamma_line_data <- data[data$distribution == "Gamma", ]
+  area_data <- data[data$distribution == "Beta", ]
+
+  # Plot known and unknown distributions
+  p <- ggplot2::ggplot() +
+    # ggplot2::geom_point(data = point_data, ggplot2::aes(x = point_data$sq_skewness, y = point_data$kurtosis, color = point_data$distribution), size = 5) +
+    # ggplot2::geom_line(data = exp_line_data, ggplot2::aes(x = exp_line_data$sq_skewness, y = exp_line_data$kurtosis, color = exp_line_data$distribution), size = 0.8) +
+    # ggplot2::geom_line(data = gamma_line_data, ggplot2::aes(x = gamma_line_data$sq_skewness, y = gamma_line_data$kurtosis, color = gamma_line_data$distribution), size = 0.8) +
+    # ggplot2::geom_polygon(data = area_data, ggplot2::aes(x = area_data$sq_skewness, y = area_data$kurtosis, fill = area_data$distribution), alpha = 0.5) +
+
+    with(point_data, ggplot2::geom_point(ggplot2::aes(x = sq_skewness, y = kurtosis, color = distribution), size = 5)) +
+    with(exp_line_data, ggplot2::geom_line(ggplot2::aes(x = sq_skewness, y = kurtosis, color = distribution), linewidth = 0.8)) +
+    with(gamma_line_data, ggplot2::geom_line(ggplot2::aes(x = sq_skewness, y = kurtosis, color = distribution), linewidth = 0.8)) +
+    with(area_data, ggplot2::geom_polygon(ggplot2::aes(x = sq_skewness, y = kurtosis, fill = distribution), alpha = 0.5)) +
+
+    # Plot unknown points with thick X and circle
+    ggplot2::geom_point(data = object$points, ggplot2::aes(x = object$points$sq_skewness, y = object$points$kurtosis),
+                        color = "black", shape = 21, fill = "white", size = 2) +
+    ggplot2::geom_point(data = object$points, ggplot2::aes(x = object$points$sq_skewness, y = object$points$kurtosis),
+                        color = "black", shape = 4, size = 1) +
+
+    # Reverse the y-axis for Kurtosis
+    ggplot2::scale_y_reverse() +
+
+    # Axis labels
+    ggplot2::xlab(expression(paste("Square of Skewness (", beta[1]^2, ")"))) +
+    ggplot2::ylab(expression(paste("Kurtosis (", beta[2], ")"))) +
+
+    # Legend and title
+    ggplot2::ggtitle("Pearson Diagram with Different Distribution Families") +
+    ggplot2::scale_color_manual(name = "Point & Line Representations",  # Custom legend title
+                                values = c("Normal" = "skyblue",
+                                           "Uniform" = "lightgreen",
+                                           "Exponential" = "lightcoral",
+                                           "Gamma" = "plum",
+                                           "Beta" = "lightsalmon")) +
+    ggplot2::scale_fill_manual(name= "Area Representations", values = c("Beta" = "lightsalmon")) +
     ggplot2::theme_minimal()
 
   print(p)
   return(p)
 }
 
-#' Plot the Pearson Diagram with Unknown Distribution
-#' @param object PearsonDiagram object
-#' @return ggplot2 object representing the Pearson diagram with an unknown distribution
-#' @export
-plot_diagram_with_unknown <- function(object) {
-  if (nrow(object$points) == 0) {
-    stop("No points to plot. Add points to the Pearson diagram first.")
-  }
-
-
-  p <- ggplot2::ggplot(object$points, ggplot2::aes(x = object$points$skewness, y = object$points$kurtosis)) +
-
-    ggplot2::geom_point(ggplot2::aes(color = object$points$distribution, shape = object$points$distribution), size = 1) +
-    ggplot2::scale_color_manual(values = c("Normal" = "blue", "Exponential" = "red",
-                                           "Uniform" = "green", "Beta" = "orange",
-                                           "Gamma" = "purple", "Unknown" = "black")) +
-    ggplot2::scale_shape_manual(values = c("Normal" = 16, "Exponential" = 16,
-                                           "Uniform" = 16, "Beta" = 16,
-                                           "Gamma" = 16, "Unknown" = 4)) +  # 'X' symbol for unknown
-
-    ggplot2::xlab("Skewness") +
-    ggplot2::ylab("Kurtosis") +
-    ggplot2::ggtitle("Pearson Diagram with Unknown Distribution") +
-    ggplot2::theme_minimal()
-
-  print(p)
-  return(p)
-}
-
-
-#' Compare and Plot Multiple Distributions on Pearson Diagram
-#'
-#' This function generates samples from various distributions (Normal, Exponential, Uniform, Beta, Gamma),
-#' calculates their skewness and kurtosis, and plots them on the Pearson Diagram.
-#'
-#' @param object PearsonDiagram object
-#' @param n_samples Number of samples to generate for each distribution
-#' @param sample_size Size of each sample
-#' @return Updated PearsonDiagram object with new points and a plot
-#' @export
-compare_multiple_distributions <- function(object, n_samples = 100, sample_size = 1000) {
-
-  # Define distributions
-  distributions <- list(
-    "Normal" = function() stats::rnorm(sample_size),
-    "Exponential" = function() stats::rexp(sample_size),
-    "Uniform" = function() stats::runif(sample_size),
-    "Beta" = function() stats::rbeta(sample_size, 2, 5),
-    "Gamma" = function() stats::rgamma(sample_size, shape = 2, rate = 1)
-  )
-
-  # Iterate over each distribution
-  for (dist_name in names(distributions)) {
-    for (i in 1:n_samples) {
-      data <- distributions[[dist_name]]()
-      sk_kt <- cpp_calculate_skewness_kurtosis(data)
-      object <- add_point(object, sk_kt[1], sk_kt[2], dist_name)
-    }
-  }
-
-  # Plot the Pearson Diagram
-  plot_diagram(object)
-  return(object)
-}
 
 #' Calculate Skewness and Kurtosis Using Rcpp
 #'
