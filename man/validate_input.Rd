@@ -7,12 +7,12 @@
 validate_input(data)
 }
 \arguments{
-\item{data}{A numeric vector containing the data points, or a PearsonDiagram object.}
+\item{data}{A numeric vector, a list of numeric vectors containing the data points, or a PearsonDiagram object.}
 }
 \value{
 TRUE if the input is valid, otherwise stops with an error.
 }
 \description{
 This function checks if the input data or PearsonDiagram object is valid.
-It validates numeric vectors for input data or a PearsonDiagram object with valid points data.
+It validates numeric vectors or lists of numeric vectors for input data or a PearsonDiagram object with valid points data.
 }

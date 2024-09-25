@@ -1,8 +1,8 @@
 ---
-title: "plot_pearson_diagram"
+title: "Pearson Diagram"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{plot_pearson_diagram}
+  %\VignetteIndexEntry{Pearson Diagram}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -14,17 +14,70 @@ knitr::opts_chunk$set(
 )
 ```
 
-### Vignette for the Pearson Diagram Package
+### Vignette for Pearson Diagram Package
 # Pearson Diagram: Skewness and Kurtosis Visualization of Distributions
-Hello and welcome to the Pearson Diagram Package Vignette! This software demonstrates several distributions on a Pearson Diagram by plotting their skewness and kurtosis. For efficient calculation and visualization, the package makes use of base R, ggplot2, and Rcpp. This vignette will walk you through how to use the functions included with this package.
+The pearson.diagram package provides a simple and effective way to visualize the skewness and kurtosis of known and custom distributions on the Pearson diagram. This vignette demonstrates how to use the package, generate diagrams, add custom data points, and utilize the bootstrap functionality.
 
 ## Installation
 If the package is not yet installed, you can install it using:
 
 ```
-install_github("renswickd/R-Package-for-Pearson-Diagram")
+devtools::install_github("renswickd/R-Package-for-Pearson-Diagram")
 ```
 ## Loading the Package
 ```{r setup}
-library(pearson.diagram) 
+library(pearson.diagram)
 ```
+
+## 1. Creating the Pearson Diagram Canvas
+
+Before plotting, the first step is to create a canvas using the `create_canvas()` function. This sets up the base diagram showing different distribution families: (for the initial implementation these are the 5 distributions were visualized - Normal, Uniform, Exponential, Gamma and Beta)
+
+```{r}
+# Create a new PearsonDiagram object
+pd <- PearsonDiagram()
+pd
+```
+
+
+## 2. Adding Input Data Points
+You can add custom input data to the diagram using the plot_diagram() function. The input can be a single numeric vector or a list of numeric vectors, which will be plotted as points on the Pearson diagram.
+
+### 2.1 Single Dataset Example
+Let’s first add a normally distributed dataset and visualize its skewness and kurtosis:
+```{r}
+pd <- PearsonDiagram()
+data <- rnorm(1000) # Generate a random normal dataset
+plot_diagram(pd, input_data = data) # Plot the Pearson diagram with this single dataset
+```
+
+### 2.2 Multiple Datasets Example
+You can also provide multiple datasets (e.g., Normal, Gamma, Exponential), and the function will calculate and plot each one:
+```{r}
+pd <- PearsonDiagram()
+data1 <- rnorm(1000)            # Normal distribution
+data2 <- rgamma(1000, shape = 2) # Gamma distribution1
+data3 <- rgamma(1000, shape = 1)   # Gamma distribution2
+
+# Plot the Pearson diagram with multiple datasets
+plot_diagram(pd, input_data = list(data1, data2, data3))
+```
+## 3. Using cpp_calculate_moments to Calculate Skewness and Kurtosis
+For custom datasets, you can use `cpp_calculate_moments()` to efficiently compute the skewness and kurtosis using a high-performance Rcpp implementation. Here's an example of using this function on a randomly generated dataset:
+```{r}
+moments <- cpp_calculate_moments(data1)
+print(moments)
+```
+## 4. Bootstrap Functionality
+The `plot_diagram(`) function also supports a bootstrap argument, which allows for bootstrapping the samples and calculate skewness and kurtosis for each samples when enabled. Although the current implementation has a placeholder for this functionality, it can be extended in future versions.
+```{r}
+# YET TO BE IMPLEMENTED
+```
+
+## 5. Outlier detection 
+A basic level of identifying and providing appropriate warning regarding the extreme values of the input data will be developed in the further versions of the package.
+
+
+
+
+

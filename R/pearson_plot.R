@@ -44,56 +44,14 @@ add_point.PearsonDiagram <- function(object, sq_skewness, kurtosis, distribution
   return(object)
 }
 
-#' Plot the Pearson Diagram
-#'
-#' This function plots the Pearson diagram, calculates moments if input data is provided,
-#' and adds bootstrap functionality.
-#'
-#' @param object A PearsonDiagram object.
-#' @param data Optional input data for which moments (skewness, kurtosis) will be calculated.
-#' @param bootstrap Boolean indicating if bootstrap should be applied (default is FALSE).
-#' @param hover Boolean indicating if hover functionality should be enabled (default is FALSE).
-#' @return A ggplot2 object representing the Pearson diagram.
-#' @export
-plot_diagram <- function(object, data = NULL, bootstrap = FALSE, hover = FALSE) {
-  validate_input(object)
-
-  # Create the base canvas with known distributions
-  p <- create_pearson_canvas()
-
-  # If input data is provided, calculate the skewness and kurtosis and add points
-  if (!is.null(data)) {
-    validate_input(data)
-    moments <- cpp_calculate_moments(data)
-    object <- add_point(object, sq_skewness = moments$sq_skewness, kurtosis = moments$kurtosis, distribution = "Input Data")
-    if (nrow(object$points) > 0) {
-      # Plot the points for the Pearson diagram
-      p <- p + ggplot2::geom_point(data = object$points, ggplot2::aes(x = object$points$sq_skewness, y = object$points$kurtosis),
-                                   color = "black", shape = 21, fill = "white", size = 2)
-      p <- p + ggplot2::geom_point(data = object$points, ggplot2::aes(x = object$points$sq_skewness, y = object$points$kurtosis),
-                                   color = "black", shape = 4, size = 1)
-    }
-  }
-
-  # If bootstrap is enabled, add the placeholder function
-  if (bootstrap) {
-    placeholder_bootstrap_function()
-  }
-
-  # If hover is enabled, add hover functionality (Placeholder function for now)
-  if (hover) {
-    p <- highlight_point_on_hover(p)
-  }
-
-  return(p)
-}
-
 #' Create Pearson Diagram Canvas
 #'
-#' Creates the base Pearson diagram with known distributions.
-#' @return A ggplot2 object for the Pearson diagram.
+#' This function creates a Pearson diagram canvas with known distributions without any input data points.
+#' The canvas represents Normal, Exponential, Gamma, and Beta distributions.
+#'
+#' @return A ggplot2 object representing the Pearson diagram canvas.
 #' @export
-create_pearson_canvas <- function() {
+canvas_creation <- function() {
   # Generate known distributions' data
   data <- generate_data()
 
@@ -102,26 +60,82 @@ create_pearson_canvas <- function() {
   gamma_line_data <- data[data$distribution == "Gamma", ]
   area_data <- data[data$distribution == "Beta", ]
 
-  # Create the base plot
+  # Create the canvas
   p <- ggplot2::ggplot() +
     with(point_data, ggplot2::geom_point(ggplot2::aes(x = sq_skewness, y = kurtosis, color = distribution), size = 5)) +
     with(exp_line_data, ggplot2::geom_line(ggplot2::aes(x = sq_skewness, y = kurtosis, color = distribution), linewidth = 0.8)) +
     with(gamma_line_data, ggplot2::geom_line(ggplot2::aes(x = sq_skewness, y = kurtosis, color = distribution), linewidth = 0.8)) +
     with(area_data, ggplot2::geom_polygon(ggplot2::aes(x = sq_skewness, y = kurtosis, fill = distribution), alpha = 0.5)) +
+
+    # Reverse the y-axis for Kurtosis
     ggplot2::scale_y_reverse() +
+
+    # Axis labels
     ggplot2::xlab(expression(paste("Square of Skewness (", beta[1]^2, ")"))) +
     ggplot2::ylab(expression(paste("Kurtosis (", beta[2], ")"))) +
-    ggplot2::ggtitle("Pearson Diagram") +
-    ggplot2::scale_color_manual(name = "Points & Lines", values = c("Normal" = "skyblue", "Uniform" = "lightgreen", "Exponential" = "lightcoral", "Gamma" = "plum", "Beta" = "lightsalmon")) +
-    ggplot2::scale_fill_manual(name = NULL, values = c("Beta" = "lightsalmon")) +
+
+    # Legend and title
+    ggplot2::ggtitle("Pearson Diagram Canvas") +
+    ggplot2::scale_color_manual(name = "Distributions",  # Custom legend title
+                                values = c("Normal" = "skyblue",
+                                           "Uniform" = "lightgreen",
+                                           "Exponential" = "lightcoral",
+                                           "Gamma" = "plum",
+                                           "Beta" = "lightsalmon")) +
+    ggplot2::scale_fill_manual(name= NULL, values = c("Beta" = "lightsalmon")) +
     ggplot2::theme_minimal()
 
   return(p)
 }
 
-# Placeholder for the bootstrap functionality
-placeholder_bootstrap_function <- function() {
-  message("Bootstrap functionality is a placeholder and not implemented yet.")
+#' Plot the Pearson Diagram with Input Data
+#'
+#' This function plots the Pearson diagram with known distributions and user-provided data points.
+#' It supports input_data as a numeric vector or a list of numeric vectors. For each input, it calculates the
+#' skewness and kurtosis and plots them on the canvas.
+#'
+#' @param object A PearsonDiagram object.
+#' @param input_data A numeric vector or a list of numeric vectors containing the data points (optional).
+#' @param bootstrap A boolean indicating whether to perform bootstrap analysis (placeholder for now).
+#' @param hover A boolean indicating whether to add hover functionality (placeholder for now).
+#' @return A ggplot2 object representing the Pearson diagram.
+#' @export
+plot_diagram <- function(object, input_data = NULL, bootstrap = FALSE, hover = FALSE) {
+  # Validate the PearsonDiagram object
+  validate_input(object)
+
+  # If input_data is provided, validate and add points to the PearsonDiagram object
+  if (!is.null(input_data)) {
+    validate_input(input_data)
+
+    if (is.list(input_data)) {
+      object <- add_points_from_list(object, input_data)
+    } else {
+      moments <- cpp_calculate_moments(input_data)
+      object <- add_point(object, sq_skewness = moments$sq_skewness, kurtosis = moments$kurtosis, distribution = "Input data")
+    }
+  }
+
+  # Start with the canvas
+  p <- canvas_creation()
+
+  # Add points for the user-supplied data
+  p <- p + ggplot2::geom_point(data = object$points, ggplot2::aes(x = object$points$sq_skewness, y = object$points$kurtosis),
+                               color = "black", shape = 21, fill = "white", size = 2) +
+    ggplot2::geom_point(data = object$points, ggplot2::aes(x = object$points$sq_skewness, y = object$points$kurtosis),
+                        color = "black", shape = 4, size = 1)
+
+  # Placeholder for hover functionality
+  if (hover) {
+    p <- highlight_point_on_hover(p)
+  }
+
+  # Placeholder for bootstrap functionality
+  if (bootstrap) {
+    message("Bootstrap functionality is not implemented yet.")
+  }
+
+  return(p)
 }
 
 
