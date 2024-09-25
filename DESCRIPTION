@@ -1,11 +1,11 @@
 Package: pearson.diagram
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Pearson Diagram
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
+Author: Renswick Delvar
+Maintainer: Renswick Delvar <renswick.delver@gmail.com>
 Description: The Pearson Diagram R package provides tools to visualize distributions using Pearson Diagrams.
-    Use four spaces when indenting paragraphs within the Description.
+    This package provides a simple and effective way to visualize the skewness and kurtosis of known and custom distributions on the Pearson diagram.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true

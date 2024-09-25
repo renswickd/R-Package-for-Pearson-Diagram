@@ -6,234 +6,317 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The Pearson Diagram R package provides tools to visualize distributions
-using Pearson Diagrams. It helps users calculate skewness and kurtosis
-for unknown data distributions, plot the Pearson Diagram, and compare
-multiple distributions. This package leverages **Rcpp** for efficient
-computation and follows the **S3** object-oriented programming paradigm
-in R.
+The `pearson.diagram` package distinguishes different distribution by
+visualizing their skewness and kurtosis on a Pearson diagram. It helps
+users calculate skewness and kurtosis for unknown data distributions,
+plot the Pearson Diagram, and compare multiple distributions. This
+package leverages **Rcpp** for efficient computation and follows the
+**S3** object-oriented programming paradigm in R. This file provides a
+detailed guide on how to use the package, explains its backend
+functionality, and includes a test plan that can be followed to verify
+the package’s accuracy.
 
 ## Key Features
 
-- **Plotting Pearson Diagrams:** Visualize distributions on a Pearson
-  Diagram by plotting skewness and kurtosis.
-- **Comparison of Multiple Distributions:** Compute and compare skewness
-  and kurtosis for multiple distributions.
-- **Plot the unknown data:** Allows users to include an unknown data in
-  the Pearson Diagram and helps to identify the distribution.
-- **Efficient Calculation with Rcpp:** Uses C++ for high-performance
-  calculation of skewness and kurtosis.
-- **S3 Object-Oriented Programming:** Encapsulates functionality within
-  S3 classes for Pearson Diagrams.
+- **Display Pearson Diagrams:** Use a Pearson Diagram to view several
+  distributions by showing their skewness and kurtosis values for easy
+  comparison.
 
-## To validate the build status
+- **Plotting Unknown Data:** Allows users to calculate and plot skewness
+  and kurtosis, which helps in the identification of the true
+  distribution.
 
-Clone the repository to local folder and run the below codes
+- **Bootstrapping Functionality:** (A placeholder for future
+  development) Users can generate bootstrap samples from their data and
+  plot variations of skewness and kurtosis on the diagram.
+
+- **Efficient Calculation with Rcpp:** Rcpp uses C++ to carry out
+  high-performance skewness and kurtosis calculations, enabling
+  efficient processing of huge datasets.
+
+- **Hovering Functionality:** The Interactive Hovering Feature allows
+  for user interactions by offering customized hover tooltips and
+  advanced visual feedback when interacting with Pearson Diagram points.
+
+- **S3 Object-Oriented Programming:** Implements functionality using S3
+  classes, encapsulating Pearson Diagrams as objects and providing
+  methods to add data points and plot the results in a structured,
+  object-oriented way.
+
+## 1. Installation and loading the package
+
+Install the package from GitHub using the following command:
 
 ``` r
-library(devtools)
+# devtools::install_github("renswickd/R-Package-for-Pearson-Diagram")
 ```
 
-Work on the below command to check if the package is build successfully.
+Once installed, load the package:
 
 ``` r
-devtools::check()
-#> ══ Documenting ═════════════════════════════════════════════════════════════════
-#> ℹ Updating pearson.diagram documentation
-#> ℹ Loading pearson.diagram
-#> 
-#> ══ Building ════════════════════════════════════════════════════════════════════
-#> Setting env vars:
-#> • CFLAGS    : -Wall -pedantic
-#> • CXXFLAGS  : -Wall -pedantic
-#> • CXX11FLAGS: -Wall -pedantic
-#> • CXX14FLAGS: -Wall -pedantic
-#> • CXX17FLAGS: -Wall -pedantic
-#> • CXX20FLAGS: -Wall -pedantic
-#> ── R CMD build ─────────────────────────────────────────────────────────────────
-#>      checking for file ‘/Users/rens/Library/CloudStorage/OneDrive-VictoriaUniversityofWellington-STUDENT/Assignments/T2/DATA501/DATA501-project/project-plan/pearson.diagram/DESCRIPTION’ ...  ✔  checking for file ‘/Users/rens/Library/CloudStorage/OneDrive-VictoriaUniversityofWellington-STUDENT/Assignments/T2/DATA501/DATA501-project/project-plan/pearson.diagram/DESCRIPTION’
-#>   ─  preparing ‘pearson.diagram’:
-#>    checking DESCRIPTION meta-information ...  ✔  checking DESCRIPTION meta-information
-#>   ─  cleaning src
-#>   ─  checking for LF line-endings in source and make files and shell scripts
-#>   ─  checking for empty or unneeded directories
-#>      Omitted ‘LazyData’ from DESCRIPTION
-#>   ─  building ‘pearson.diagram_0.1.0.tar.gz’
-#>      
-#> ══ Checking ════════════════════════════════════════════════════════════════════
-#> Setting env vars:
-#> • _R_CHECK_CRAN_INCOMING_REMOTE_               : FALSE
-#> • _R_CHECK_CRAN_INCOMING_                      : FALSE
-#> • _R_CHECK_FORCE_SUGGESTS_                     : FALSE
-#> • _R_CHECK_PACKAGES_USED_IGNORE_UNUSED_IMPORTS_: FALSE
-#> • NOT_CRAN                                     : true
-#> ── R CMD check ─────────────────────────────────────────────────────────────────
-#>   ─  using log directory ‘/private/var/folders/z6/47hkfr6s6d1_cchpbbsz96k40000gn/T/RtmpilBqt3/fileb4043a3ec67a/pearson.diagram.Rcheck’
-#> ─  using R version 4.4.0 (2024-04-24)
-#>   ─  using platform: aarch64-apple-darwin20
-#> ─  R was compiled by
-#>        Apple clang version 14.0.0 (clang-1400.0.29.202)
-#>        GNU Fortran (GCC) 12.2.0
-#> ─  running under: macOS Sonoma 14.3
-#> ─  using session charset: UTF-8
-#>   ─  using options ‘--no-manual --as-cran’
-#>   ✔  checking for file ‘pearson.diagram/DESCRIPTION’
-#>   ─  checking extension type ... Package
-#> ─  this is package ‘pearson.diagram’ version ‘0.1.0’
-#> ─  package encoding: UTF-8
-#>    checking package namespace information ...  ✔  checking package namespace information
-#>      checking package dependencies ...  ✔  checking package dependencies (4.8s)
-#>    checking if this is a source package ...  ✔  checking if this is a source package
-#> ✔  checking if there is a namespace
-#>      checking for executable files ...  ✔  checking for executable files
-#>   ✔  checking for hidden files and directories
-#>    checking for portable file names ...  ✔  checking for portable file names
-#> ✔  checking for sufficient/correct file permissions
-#>   ✔  checking serialization versions
-#>      checking whether package ‘pearson.diagram’ can be installed ...  ✔  checking whether package ‘pearson.diagram’ can be installed (2.6s)
-#>   ─  used C++ compiler: ‘Apple clang version 15.0.0 (clang-1500.3.9.4)’
-#> ─  used SDK: ‘MacOSX14.4.sdk’
-#>    checking installed package size ...  ✔  checking installed package size
-#>      checking package directory ...  ✔  checking package directory
-#>    checking for future file timestamps ...  ✔  checking for future file timestamps
-#>      checking DESCRIPTION meta-information ...  ✔  checking DESCRIPTION meta-information
-#>    checking top-level files ...  ✔  checking top-level files
-#> ✔  checking for left-over files
-#> ✔  checking index information
-#>    checking package subdirectories ...  ✔  checking package subdirectories
-#>    checking code files for non-ASCII characters ...  ✔  checking code files for non-ASCII characters
-#>    checking R files for syntax errors ...  ✔  checking R files for syntax errors
-#>    checking whether the package can be loaded ...  ✔  checking whether the package can be loaded
-#>    checking whether the package can be loaded with stated dependencies ...  ✔  checking whether the package can be loaded with stated dependencies
-#>    checking whether the package can be unloaded cleanly ...  ✔  checking whether the package can be unloaded cleanly
-#>    checking whether the namespace can be loaded with stated dependencies ...  ✔  checking whether the namespace can be loaded with stated dependencies
-#>    checking whether the namespace can be unloaded cleanly ...  ✔  checking whether the namespace can be unloaded cleanly
-#>      checking dependencies in R code ...  ✔  checking dependencies in R code (446ms)
-#>    checking S3 generic/method consistency ...  ✔  checking S3 generic/method consistency
-#>    checking replacement functions ...  ✔  checking replacement functions
-#>    checking foreign function calls ...  ✔  checking foreign function calls
-#>    checking R code for possible problems ...  ✔  checking R code for possible problems (936ms)
-#>    checking Rd files ...  ✔  checking Rd files
-#>    checking Rd metadata ...  ✔  checking Rd metadata
-#>    checking Rd line widths ...  ✔  checking Rd line widths
-#>    checking Rd cross-references ...  ✔  checking Rd cross-references
-#>    checking for missing documentation entries ...  ✔  checking for missing documentation entries
-#>    checking for code/documentation mismatches ...  ✔  checking for code/documentation mismatches (346ms)
-#>    checking Rd \usage sections ...  ✔  checking Rd \usage sections
-#>      checking Rd contents ...  ✔  checking Rd contents
-#>    checking for unstated dependencies in examples ...  ✔  checking for unstated dependencies in examples
-#>   ✔  checking line endings in C/C++/Fortran sources/headers
-#>      checking pragmas in C/C++ headers and code ...  ✔  checking pragmas in C/C++ headers and code
-#>   ✔  checking compilation flags used
-#>    checking compiled code ...  ✔  checking compiled code
-#>      checking examples ...  ✔  checking examples
-#>      checking for non-standard things in the check directory ...  ✔  checking for non-standard things in the check directory
-#>    checking for detritus in the temp directory ...  ✔  checking for detritus in the temp directory
-#>      
-#>    
-#> 
-#> ── R CMD check results ────────────────────────────── pearson.diagram 0.1.0 ────
-#> Duration: 11.7s
-#> 
-#> 0 errors ✔ | 0 warnings ✔ | 0 notes ✔
-devtools::check(document = TRUE)
-#> ══ Documenting ═════════════════════════════════════════════════════════════════
-#> ℹ Updating pearson.diagram documentation
-#> ℹ Loading pearson.diagram
-#> 
-#> ══ Building ════════════════════════════════════════════════════════════════════
-#> Setting env vars:
-#> • CFLAGS    : -Wall -pedantic
-#> • CXXFLAGS  : -Wall -pedantic
-#> • CXX11FLAGS: -Wall -pedantic
-#> • CXX14FLAGS: -Wall -pedantic
-#> • CXX17FLAGS: -Wall -pedantic
-#> • CXX20FLAGS: -Wall -pedantic
-#> ── R CMD build ─────────────────────────────────────────────────────────────────
-#>      checking for file ‘/Users/rens/Library/CloudStorage/OneDrive-VictoriaUniversityofWellington-STUDENT/Assignments/T2/DATA501/DATA501-project/project-plan/pearson.diagram/DESCRIPTION’ ...  ✔  checking for file ‘/Users/rens/Library/CloudStorage/OneDrive-VictoriaUniversityofWellington-STUDENT/Assignments/T2/DATA501/DATA501-project/project-plan/pearson.diagram/DESCRIPTION’
-#>   ─  preparing ‘pearson.diagram’:
-#>    checking DESCRIPTION meta-information ...  ✔  checking DESCRIPTION meta-information
-#>   ─  cleaning src
-#>   ─  checking for LF line-endings in source and make files and shell scripts
-#>   ─  checking for empty or unneeded directories
-#>      Omitted ‘LazyData’ from DESCRIPTION
-#>   ─  building ‘pearson.diagram_0.1.0.tar.gz’
-#>      
-#> ══ Checking ════════════════════════════════════════════════════════════════════
-#> Setting env vars:
-#> • _R_CHECK_CRAN_INCOMING_REMOTE_               : FALSE
-#> • _R_CHECK_CRAN_INCOMING_                      : FALSE
-#> • _R_CHECK_FORCE_SUGGESTS_                     : FALSE
-#> • _R_CHECK_PACKAGES_USED_IGNORE_UNUSED_IMPORTS_: FALSE
-#> • NOT_CRAN                                     : true
-#> ── R CMD check ─────────────────────────────────────────────────────────────────
-#>   ─  using log directory ‘/private/var/folders/z6/47hkfr6s6d1_cchpbbsz96k40000gn/T/RtmpilBqt3/fileb40451dd0648/pearson.diagram.Rcheck’
-#>   ─  using R version 4.4.0 (2024-04-24)
-#> ─  using platform: aarch64-apple-darwin20
-#> ─  R was compiled by
-#>        Apple clang version 14.0.0 (clang-1400.0.29.202)
-#>        GNU Fortran (GCC) 12.2.0
-#> ─  running under: macOS Sonoma 14.3
-#> ─  using session charset: UTF-8
-#>   ─  using options ‘--no-manual --as-cran’
-#>      checking for file ‘pearson.diagram/DESCRIPTION’ ...  ✔  checking for file ‘pearson.diagram/DESCRIPTION’
-#>   ─  checking extension type ... Package
-#> ─  this is package ‘pearson.diagram’ version ‘0.1.0’
-#> ─  package encoding: UTF-8
-#>    checking package namespace information ...  ✔  checking package namespace information
-#>    checking package dependencies ...  ✔  checking package dependencies (6.6s)
-#>   ✔  checking if this is a source package
-#> ✔  checking if there is a namespace
-#>      checking for executable files ...  ✔  checking for executable files
-#>    checking for hidden files and directories ...  ✔  checking for hidden files and directories
-#>    checking for portable file names ...  ✔  checking for portable file names
-#> ✔  checking for sufficient/correct file permissions
-#>   ✔  checking serialization versions
-#>      checking whether package ‘pearson.diagram’ can be installed ...  ✔  checking whether package ‘pearson.diagram’ can be installed (2.4s)
-#> ─  used C++ compiler: ‘Apple clang version 15.0.0 (clang-1500.3.9.4)’
-#>   ─  used SDK: ‘MacOSX14.4.sdk’
-#>    checking installed package size ...  ✔  checking installed package size
-#>      checking package directory ...  ✔  checking package directory
-#>    checking for future file timestamps ...  ✔  checking for future file timestamps (434ms)
-#>      checking DESCRIPTION meta-information ...  ✔  checking DESCRIPTION meta-information
-#>    checking top-level files ...  ✔  checking top-level files
-#> ✔  checking for left-over files
-#> ✔  checking index information
-#>    checking package subdirectories ...  ✔  checking package subdirectories
-#>    checking code files for non-ASCII characters ...  ✔  checking code files for non-ASCII characters
-#>    checking R files for syntax errors ...  ✔  checking R files for syntax errors
-#>    checking whether the package can be loaded ...  ✔  checking whether the package can be loaded
-#>    checking whether the package can be loaded with stated dependencies ...  ✔  checking whether the package can be loaded with stated dependencies
-#>    checking whether the package can be unloaded cleanly ...  ✔  checking whether the package can be unloaded cleanly
-#>    checking whether the namespace can be loaded with stated dependencies ...  ✔  checking whether the namespace can be loaded with stated dependencies
-#>    checking whether the namespace can be unloaded cleanly ...  ✔  checking whether the namespace can be unloaded cleanly
-#>      checking dependencies in R code ...  ✔  checking dependencies in R code (474ms)
-#>    checking S3 generic/method consistency ...  ✔  checking S3 generic/method consistency
-#>    checking replacement functions ...  ✔  checking replacement functions
-#>    checking foreign function calls ...  ✔  checking foreign function calls
-#>    checking R code for possible problems ...  ✔  checking R code for possible problems (929ms)
-#>    checking Rd files ...  ✔  checking Rd files
-#>    checking Rd metadata ...  ✔  checking Rd metadata
-#>    checking Rd line widths ...  ✔  checking Rd line widths
-#>    checking Rd cross-references ...  ✔  checking Rd cross-references
-#>      checking for missing documentation entries ...  ✔  checking for missing documentation entries
-#>    checking for code/documentation mismatches ...  ✔  checking for code/documentation mismatches (350ms)
-#>    checking Rd \usage sections ...  ✔  checking Rd \usage sections
-#>    checking Rd contents ...  ✔  checking Rd contents
-#>    checking for unstated dependencies in examples ...  ✔  checking for unstated dependencies in examples
-#>   ✔  checking line endings in C/C++/Fortran sources/headers
-#>      checking pragmas in C/C++ headers and code ...  ✔  checking pragmas in C/C++ headers and code
-#>   ✔  checking compilation flags used
-#>    checking compiled code ...  ✔  checking compiled code
-#>      checking examples ...  ✔  checking examples
-#>   ✔  checking for non-standard things in the check directory
-#>   ✔  checking for detritus in the temp directory
-#>      
-#>    
-#> 
-#> ── R CMD check results ────────────────────────────── pearson.diagram 0.1.0 ────
-#> Duration: 13.5s
-#> 
-#> 0 errors ✔ | 0 warnings ✔ | 0 notes ✔
-# devtools::check(document = TRUE, manual = TRUE)
+library(pearson.diagram)
 ```
+
+## 2. Overview of Main Functions
+
+### 2.1 `plot_diagram()` (Main Function)
+
+The Pearson diagram illustrates the relationship between the skewness
+and kurtosis of several probability distributions. The $x-\text{axis}$
+shows the square of skewness, while the $y-\text{axis}$ shows the
+kurtosis. This figure helps in visually identifying the properties of
+various distributions and how they fit in the skewness-kurtosis space.
+
+Skewness $\beta_{1}=\mu_{3}^{2}/\mu_{2}^{3}$
+
+Kurtosis $\beta_{2}=\mu_{4}/\mu_{2}^{2}$
+
+- This is the main function that generates the Pearson diagram. It
+  accepts a variety of input parameters, including a Pearson object,
+  custom input data, and option to enable bootstrap functionality or
+  hover-over interactivity.
+- If custom (unknown) data is provided, it calculates the square of
+  skewness and kurtosis for the data points and highlights them on the
+  plot. Otherwise, the function generates a pearson plot with known
+  distribution families and no extra points.
+
+``` r
+pd <- PearsonDiagram() # Create empty pearson diagram object
+data <- rnorm(10000) # Generate a random normal dataset
+plot_diagram(pd, input_data = data) # Plot the Pearson diagram with this single dataset
+```
+
+<img src="man/figures/README-unnamed-chunk-4-1.png" width="50%" />
+
+#### 2.1.1 `canvas_creation()`
+
+The `canvas_creation()` function builds the layout of the Pearson
+diagram. It contains known distribution families with three different
+sorts of representations:
+
+- *Point Representation:* Normal and Uniform distributions are
+  represented by a single point since their skewness and kurtosis values
+  are fixed.
+
+- *Line Representation:* Exponential and Gamma distributions, whose
+  skewness and kurtosis vary with a parameter, are displayed as lines.
+
+- *Area Representation:* In Beta distributions, where multiple shape
+  parameters influence skewness and kurtosis, an area can be seen to
+  show a range of skewness and kurtosis values.
+
+``` r
+canvas_creation()
+```
+
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="50%" />
+
+### 2.2 `cpp_calculate_moments()`
+
+This function calculates the skewness and kurtosis using
+high-performance Rcpp code. It is optimized to handle large datasets
+efficiently. It returns a list containing the square of skewness and
+kurtosis.
+
+``` r
+moments <- cpp_calculate_moments(data)
+print(moments)
+#> $sq_skewness
+#> [1] 0.0001432919
+#> 
+#> $kurtosis
+#> [1] 2.959693
+```
+
+### 2.3 `Object Oriented Programming`
+
+The `pearson.diagram` package utilizes OOP approach using R S3 classes.
+This gives for greater flexibility when it comes to adding custom data
+points and customizing plot characteristics. By designing the package in
+such a way, it is easier to expand or modify the behavior of each
+function for different kinds of data and objects. The following
+functions are crucial for implementing OOP:
+
+- `PearsonDiagram()`: Creates an object of the `PearsonDiagram` class
+  containing information on values required to create the canvas and
+  plot the points such as square of skewness, kurtosis, and the
+  distribution name.
+
+- `add_point.PearsonDiagram()`: Uses the dispatch function to add points
+  to the `PearsonDiagram` object. This method allows users to add
+  additional data to the object in a systematic manner.
+
+- `plot_diagram.PearsonDiagram()` plots the Pearson diagram by
+  dispatching based on the object’s class.
+
+### 2.4 `add_point()`
+
+The function`add_point()` inserts a point to the PearsonDiagram object.
+This point is distinguished by the square of skewness, kurtosis, and the
+optional distribution name. The point may indicate known distributions
+or custom data provided by the user.
+
+#### `Backend Functioning`:
+
+- For given distributions (5 distributions mentioned in section\[2.1\]),
+  analytical formulae are used to calculate the square of skewness and
+  kurtosis.
+- For unknown input data, the function uses the
+  `cpp_calculate_moments()` function to efficiently compute these
+  values.
+
+### 2.5 `validate_input()`
+
+The `validate_input()` function ensures that the user-provided data is
+valid. The function eliminates runtime issues by requiring valid input
+and ensuring accurate skewness and kurtosis computations. Below are the
+conditions validated by the function:
+
+- *Numeric:* The input data must be numeric.
+- *Length:* The input must contain at least 3 data points to allow for
+  meaningful calculations of skewness and kurtosis.
+- *Missing values:* The input must not contain NA or NaN values.
+- *Infinite values:* The input must not contain Inf or -Inf values.
+- *Zero variance:* The input data must have non-zero variance. Constant
+  data will not provide meaningful statistics for skewness or kurtosis.
+
+### 2.6 Customization (`highlight_point_on_hover()`)
+
+This function is currently implemented as a PLACEHOLDER, but upcoming
+versions will have extensive interactivity with the Pearson diagram.
+
+#### Planned Features:
+
+- Users will be able to hover over points in the diagram to see tooltips
+  with information such as skewness, kurtosis, and the distribution
+  name. Also, when user hover over various portions of the plot, user
+  can trigger actions like zooming in.
+- Beyond hovering over the plotted points, I aim to implement the plot
+  customization (including title, font, color etc.)
+- Aiming to enable the users to download the plot to specified directory
+  in local.
+
+### 2.7 Bootstrapping Functionality
+
+The `plot_diagram()` method has a bootstrapping option, which, if
+enabled, bootstraps the input data. Bootstrapping is the process of
+resampling input data using replacement to produce a large number of
+simulated samples. The resampled datasets are then used to estimate the
+skewness and kurtosis distributions.
+
+**Visualization:** Bootstrapped samples will be provided alongside the
+main data points, allowing users to view the variability and
+distribution of skewness and kurtosis for their input data.
+
+## 3. Example Workflow
+
+Here’s a complete example workflow to help you get started with the
+`pearson.diagram` package: Detailed examples and steps explained are
+available in the vignettes of the package.
+
+``` r
+pd <- PearsonDiagram()
+data1 <- rnorm(1000)            # Normal distribution
+data2 <- rgamma(1000, shape = 2) # Gamma distribution
+
+# Plot Pearson diagram with multiple datasets
+plot_diagram(pd, input_data = list(data1, data2))
+```
+
+<img src="man/figures/README-unnamed-chunk-7-1.png" width="50%" />
+
+## 4. Test Plan
+
+Testing the `pearson.diagram` package is critical to ensuring that its
+functionality works as expected, including basic functions such as
+calculating skewness and kurtosis, creating visualizations, processing
+user inputs, and maintaining the package’s performance under various
+conditions. The test plan is divided into two sections: implemented
+tests and yet-to-be implemented tests.
+
+### 4.1 Unit Testing
+
+##### 4.1.1 `plot_diagram()` - Validate that the function correctly plots the Pearson diagram with the correct visual representation of known and custom distributions.
+
+- *Test Input:* A `PearsonDiagram` object with points representing
+  Normal, Exponential, and Gamma distributions.
+- *Expected Result:* Correct plot with distinct representations (point,
+  line, area) for each distribution.
+- **Status: Implemented**
+
+``` r
+# refer (section [2.1], section [3])
+```
+
+##### 4.1.2 cpp_calculate_skewness_kurtosis() - Ensure that this function accurately calculates skewness and kurtosis for known distributions.
+
+- *Test Input:* A vector of random data from a standard normal
+  distribution.
+- *Expected Result:* Skewness close to 0 and kurtosis close to 3.
+- **Status: Implemented**
+
+``` r
+# refer (section [2.2])
+```
+
+##### 4.1.3 add_point() - Ensure that a point representing a distribution (given its skewness and kurtosis) is correctly added to the PearsonDiagram object.
+
+- *Test Input:* Skewness and kurtosis values for a known distribution
+  like Gamma.
+- *Expected Result:* Point added to the PearsonDiagram object with
+  accurate properties.
+- **Status: Implemented**
+
+##### 4.1.4 validate_input() - Ensure that the function correctly validates input datasets and raises appropriate error messages for invalid inputs (e.g., non-numeric data, missing values, infinite values).
+
+- *Test Input:* A vector / list containing NA values.
+- *Expected Result:* Error message indicating invalid input.
+- **Status: Implemented**
+
+### 4.2 Edge Case Testing
+
+##### 4.2.1 validate_input() - Validate that the function handles edge cases such as datasets with outliers or insufficient points.
+
+- *Test Input:* A constant numeric vector/list.
+- *Expected Result:* Error message indicating that the data has zero
+  variance.
+- **Status: Implemented**
+
+##### 4.2.2 `plot_diagram()` - Test edge cases where the PearsonDiagram object has no points or insufficient data.
+
+- *Test Input:* An empty PearsonDiagram object.
+- *Expected Result:* Error message stating that there are no points to
+  plot.
+- **Status: Implemented**
+
+### 4.3 Performance Testing
+
+##### 4.3.1 cpp_calculate_skewness_kurtosis() - Benchmark the performance of this function when processing large datasets, especially with C++ backend through Rcpp.
+
+- *Test Input:* Large numeric datasets with 10,000+ observations.
+- *Expected Result:* Fast and efficient calculation of skewness and
+  kurtosis.
+- **Status: Yet to be Implemented**
+
+##### 4.3.2 Stress Testing - Evaluate the behavior of the package under stress by processing very large or complex datasets.
+
+- *Test Input:* A combination of large datasets with varied
+  distributions (Normal, Exponential, Gamma).
+- *Expected Result:* Identify performance bottlenecks, memory usage
+  issues, or potential optimizations.
+- **Status: Yet to be Implemented**
+
+##### 4.3.3 `plot_diagram()` with Bootstrapping - Test the bootstrapping functionality to ensure that it correctly visualizes resampled distributions.
+
+- *Test Input:* Small numeric dataset with bootstrap = TRUE.
+- *Expected Result:* Bootstrapped samples visualized on the Pearson
+  diagram with correct representation of distribution variability.
+- **Status: Yet to be Implemented**
+
+### 4.4 Continuous Integration (Automated Testing)
+
+##### 4.4.1 Objective: Implement continuous integration (CI) using tools like testthat and set up pipelines for automatic testing of the package upon each commit or pull request.
+
+- Expected Outcome: CI will run unit tests automatically and flag any
+  issues caused by new code changes.
+- **Status: Yet to be implemented**
