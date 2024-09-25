@@ -2,16 +2,24 @@
 % Please edit documentation in R/pearson_plot.R
 \name{plot_diagram}
 \alias{plot_diagram}
-\title{Plot the Pearson Diagram}
+\title{Plot the Pearson Diagram with Input Data}
 \usage{
-plot_diagram(object)
+plot_diagram(object, input_data = NULL, bootstrap = FALSE, hover = FALSE)
 }
 \arguments{
 \item{object}{A PearsonDiagram object.}
+
+\item{input_data}{A numeric vector or a list of numeric vectors containing the data points (optional).}
+
+\item{bootstrap}{A boolean indicating whether to perform bootstrap analysis (placeholder for now).}
+
+\item{hover}{A boolean indicating whether to add hover functionality (placeholder for now).}
 }
 \value{
 A ggplot2 object representing the Pearson diagram.
 }
 \description{
-This function plots the Pearson diagram with known distributions and added points.
+This function plots the Pearson diagram with known distributions and user-provided data points.
+It supports input_data as a numeric vector or a list of numeric vectors. For each input, it calculates the
+skewness and kurtosis and plots them on the canvas.
 }
