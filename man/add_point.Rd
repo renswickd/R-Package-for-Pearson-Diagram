@@ -4,7 +4,7 @@
 \alias{add_point}
 \title{Add a point to the Pearson Diagram}
 \usage{
-add_point(object, sq_skewness, kurtosis, distribution)
+add_point(object, sq_skewness, kurtosis, distribution = NA)
 }
 \arguments{
 \item{object}{PearsonDiagram object}

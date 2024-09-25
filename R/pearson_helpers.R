@@ -9,13 +9,21 @@ validate_input <- function(data) {
   if (!is.numeric(data)) {
     stop("Input data must be numeric.")
   }
-
   if (length(data) < 3) {
     stop("Input data must contain at least 3 data points.")
   }
-
+  if (any(is.na(data))) {
+    stop("Input contains missing values.")
+  }
+  if (any(is.infinite(data))) {
+    stop("Input contains infinite values.")
+  }
+  if (stats::sd(data) == 0) {
+    stop("Input data has zero variance, please provide more varied data.")
+  }
   return(TRUE)
 }
+
 
 #' Calculate Skewness and Kurtosis for Known Distributions
 #'

@@ -24,7 +24,7 @@ PearsonDiagram <- function() {
 #' @param distribution The name of the distribution
 #' @return Updated PearsonDiagram object with new points
 #' @export
-add_point <- function(object, sq_skewness, kurtosis, distribution) {
+add_point <- function(object, sq_skewness, kurtosis, distribution=NA) {
   UseMethod("add_point")
 }
 
@@ -36,7 +36,7 @@ add_point <- function(object, sq_skewness, kurtosis, distribution) {
 #' @param distribution The name of the distribution
 #' @return Updated PearsonDiagram object with new points
 #' @export
-add_point.PearsonDiagram <- function(object, sq_skewness, kurtosis, distribution) {
+add_point.PearsonDiagram <- function(object, sq_skewness, kurtosis, distribution=NA) {
   object$points <- rbind(
     object$points,
     data.frame(sq_skewness = sq_skewness, kurtosis = kurtosis, distribution = distribution)
@@ -71,10 +71,15 @@ plot_diagram.PearsonDiagram <- function(object) {
 
   # Plot known and unknown distributions
   p <- ggplot2::ggplot() +
-    ggplot2::geom_point(data = point_data, ggplot2::aes(x = point_data$sq_skewness, y = point_data$kurtosis, color = point_data$distribution), size = 5) +
-    ggplot2::geom_line(data = exp_line_data, ggplot2::aes(x = exp_line_data$sq_skewness, y = exp_line_data$kurtosis, color = exp_line_data$distribution), size = 0.8) +
-    ggplot2::geom_line(data = gamma_line_data, ggplot2::aes(x = gamma_line_data$sq_skewness, y = gamma_line_data$kurtosis, color = gamma_line_data$distribution), size = 0.8) +
-    ggplot2::geom_polygon(data = area_data, ggplot2::aes(x = area_data$sq_skewness, y = area_data$kurtosis, fill = area_data$distribution), alpha = 0.5) +
+    # ggplot2::geom_point(data = point_data, ggplot2::aes(x = point_data$sq_skewness, y = point_data$kurtosis, color = point_data$distribution), size = 5) +
+    # ggplot2::geom_line(data = exp_line_data, ggplot2::aes(x = exp_line_data$sq_skewness, y = exp_line_data$kurtosis, color = exp_line_data$distribution), size = 0.8) +
+    # ggplot2::geom_line(data = gamma_line_data, ggplot2::aes(x = gamma_line_data$sq_skewness, y = gamma_line_data$kurtosis, color = gamma_line_data$distribution), size = 0.8) +
+    # ggplot2::geom_polygon(data = area_data, ggplot2::aes(x = area_data$sq_skewness, y = area_data$kurtosis, fill = area_data$distribution), alpha = 0.5) +
+
+    with(point_data, ggplot2::geom_point(ggplot2::aes(x = sq_skewness, y = kurtosis, color = distribution), size = 5)) +
+    with(exp_line_data, ggplot2::geom_line(ggplot2::aes(x = sq_skewness, y = kurtosis, color = distribution), linewidth = 0.8)) +
+    with(gamma_line_data, ggplot2::geom_line(ggplot2::aes(x = sq_skewness, y = kurtosis, color = distribution), linewidth = 0.8)) +
+    with(area_data, ggplot2::geom_polygon(ggplot2::aes(x = sq_skewness, y = kurtosis, fill = distribution), alpha = 0.5)) +
 
     # Plot unknown points with thick X and circle
     ggplot2::geom_point(data = object$points, ggplot2::aes(x = object$points$sq_skewness, y = object$points$kurtosis),
@@ -98,8 +103,6 @@ plot_diagram.PearsonDiagram <- function(object) {
                                            "Gamma" = "plum",
                                            "Beta" = "lightsalmon")) +
     ggplot2::scale_fill_manual(name= "Area Representations", values = c("Beta" = "lightsalmon")) +
-
-    # Minimal theme
     ggplot2::theme_minimal()
 
   print(p)

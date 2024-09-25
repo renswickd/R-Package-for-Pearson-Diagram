@@ -2,6 +2,6 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 cpp_calculate_skewness_kurtosis <- function(data) {
-    .Call('_pearson_diagram_cpp_calculate_skewness_kurtosis', PACKAGE = 'pearson.diagram', data)
+    .Call(`_pearson_diagram_cpp_calculate_skewness_kurtosis`, data)
 }
 
