@@ -2,18 +2,26 @@
 % Please edit documentation in R/pearson_plot.R
 \name{plot_diagram}
 \alias{plot_diagram}
-\title{Plot the Pearson Diagram with Input Data}
+\title{Plot the Pearson Diagram with Input Data and Bootstrap Samples}
 \usage{
-plot_diagram(object, input_data = NULL, bootstrap = FALSE, hover = FALSE)
+plot_diagram(
+  object,
+  input_data = NULL,
+  bootstrap = FALSE,
+  hover = FALSE,
+  treat.outliers = FALSE
+)
 }
 \arguments{
 \item{object}{A PearsonDiagram object.}
 
 \item{input_data}{A numeric vector or a list of numeric vectors containing the data points (optional).}
 
-\item{bootstrap}{A boolean indicating whether to perform bootstrap analysis (placeholder for now).}
+\item{bootstrap}{A boolean indicating whether to perform bootstrap analysis.}
 
 \item{hover}{A boolean indicating whether to add hover functionality (placeholder for now).}
+
+\item{treat.outliers}{A boolean indicating whether to exclude extreme outliers (default is FALSE).}
 }
 \value{
 A ggplot2 object representing the Pearson diagram.
