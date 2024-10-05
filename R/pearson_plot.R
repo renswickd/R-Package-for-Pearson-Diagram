@@ -54,18 +54,27 @@ add_point.PearsonDiagram <- function(object, sq_skewness, kurtosis, distribution
 canvas_creation <- function() {
   # Generate known distributions' data
   data <- generate_data()
+  area_data <- generate_area_data()
+  area_data_limit <- area_data$min_param1
+  area_data_region <- area_data$merged_data
 
-  point_data <- data[data$distribution %in% c("Normal", "Uniform"), ]
-  exp_line_data <- data[data$distribution == "Exponential", ]
+  point_data <- data[data$distribution %in% c("Normal", "Uniform", "Exponential"), ]
+  # exp_line_data <- data[data$distribution == "Exponential", ]
   gamma_line_data <- data[data$distribution == "Gamma", ]
-  area_data <- data[data$distribution == "Beta", ]
+  inv_gamma_line_data <- data[data$distribution == "Inverse Gamma", ]
+  # area_data <- data[data$distribution == "Beta", ]
 
   # Create the canvas
   p <- ggplot2::ggplot() +
-    with(point_data, ggplot2::geom_point(ggplot2::aes(x = sq_skewness, y = kurtosis, color = distribution), size = 5)) +
-    with(exp_line_data, ggplot2::geom_line(ggplot2::aes(x = sq_skewness, y = kurtosis, color = distribution), linewidth = 0.8)) +
     with(gamma_line_data, ggplot2::geom_line(ggplot2::aes(x = sq_skewness, y = kurtosis, color = distribution), linewidth = 0.8)) +
-    with(area_data, ggplot2::geom_polygon(ggplot2::aes(x = sq_skewness, y = kurtosis, fill = distribution), alpha = 0.5)) +
+    with(inv_gamma_line_data, ggplot2::geom_line(ggplot2::aes(x = sq_skewness, y = kurtosis, color = distribution), linewidth = 0.8)) +
+    with(area_data_limit, ggplot2::geom_line(data = area_data_limit, ggplot2::aes(x = sq_skewness, y = kurtosis, color = "Beta"), linewidth = 0.8)) +
+    with(area_data_region, ggplot2::geom_ribbon(data = area_data_region,
+                ggplot2::aes(x = sq_skewness, ymin = kurtosis_min, ymax = kurtosis_max, fill = "Beta"),
+                alpha = 0.5)) +
+    with(point_data, ggplot2::geom_point(ggplot2::aes(x = sq_skewness, y = kurtosis, color = distribution), size = 5)) +
+
+
 
     # Reverse the y-axis for Kurtosis
     ggplot2::scale_y_reverse() +
@@ -81,14 +90,16 @@ canvas_creation <- function() {
                                            "Uniform" = "lightgreen",
                                            "Exponential" = "lightcoral",
                                            "Gamma" = "plum",
-                                           "Beta" = "lightsalmon")) +
-    ggplot2::scale_fill_manual(name= NULL, values = c("Beta" = "lightsalmon")) +
+                                           "Inverse Gamma" = "salmon",
+                                           "Beta" = "lightblue")) +
+    # ggplot2::scale_fill_manual(name= NULL, values = c("Beta" = "lightsalmon")) +
+    ggplot2::scale_fill_manual(values = c("Beta" = "lightblue")) +
     ggplot2::theme_minimal()
 
   return(p)
 }
 
-#' Plot the Pearson Diagram with Input Data
+#' Plot the Pearson Diagram with Input Data and Bootstrap Samples
 #'
 #' This function plots the Pearson diagram with known distributions and user-provided data points.
 #' It supports input_data as a numeric vector or a list of numeric vectors. For each input, it calculates the
@@ -96,17 +107,39 @@ canvas_creation <- function() {
 #'
 #' @param object A PearsonDiagram object.
 #' @param input_data A numeric vector or a list of numeric vectors containing the data points (optional).
-#' @param bootstrap A boolean indicating whether to perform bootstrap analysis (placeholder for now).
+#' @param bootstrap A boolean indicating whether to perform bootstrap analysis.
 #' @param hover A boolean indicating whether to add hover functionality (placeholder for now).
+#' @param treat.outliers A boolean indicating whether to exclude extreme outliers (default is FALSE).
 #' @return A ggplot2 object representing the Pearson diagram.
 #' @export
-plot_diagram <- function(object, input_data = NULL, bootstrap = FALSE, hover = FALSE) {
+plot_diagram <- function(object, input_data = NULL, bootstrap = FALSE, hover = FALSE, treat.outliers = FALSE) {
   # Validate the PearsonDiagram object
   validate_input(object)
+  p <- canvas_creation()
 
   # If input_data is provided, validate and add points to the PearsonDiagram object
   if (!is.null(input_data)) {
     validate_input(input_data)
+
+    # Handle outliers if requested
+    if (treat.outliers) {
+      if (is.list(input_data)) {
+        cleaned_list <- lapply(input_data, function(data) {
+          result <- handle_outliers(data)
+          if (result$num_outliers > 0) {
+            warning(sprintf("Outliers detected and excluded: %d outliers removed from the dataset.", result$num_outliers))
+          }
+          return(result$cleaned_data)
+        })
+        input_data <- cleaned_list
+      } else {
+        result <- handle_outliers(input_data)
+        if (result$num_outliers > 0) {
+          warning(sprintf("Outliers detected and excluded: %d outliers removed from the dataset.", result$num_outliers))
+        }
+        input_data <- result$cleaned_data
+      }
+    }
 
     if (is.list(input_data)) {
       object <- add_points_from_list(object, input_data)
@@ -114,28 +147,77 @@ plot_diagram <- function(object, input_data = NULL, bootstrap = FALSE, hover = F
       moments <- cpp_calculate_moments(input_data)
       object <- add_point(object, sq_skewness = moments$sq_skewness, kurtosis = moments$kurtosis, distribution = "Input data")
     }
+
+    # Generate bootstrap samples if requested
+    if (bootstrap) {
+      bootstrap_results <- bootstrap_samples(input_data)
+
+      # Create a data frame from bootstrap results
+      bootstrap_df <- do.call(rbind, lapply(bootstrap_results, function(res) {
+        data.frame(sq_skewness = res$sq_skewness, kurtosis = res$kurtosis)
+      }))
+
+      # Add bootstrap points to the plot
+      p <- canvas_creation() +
+        with(bootstrap_df, ggplot2::geom_point( ggplot2::aes(x = sq_skewness, y = kurtosis),
+                                                color = "yellow", alpha = 0.2, size = 1))
+    }
+  } else {
+    p <- canvas_creation()
   }
-
-  # Start with the canvas
-  p <- canvas_creation()
-
   # Add points for the user-supplied data
   p <- p + ggplot2::geom_point(data = object$points, ggplot2::aes(x = object$points$sq_skewness, y = object$points$kurtosis),
                                color = "black", shape = 21, fill = "white", size = 2) +
     ggplot2::geom_point(data = object$points, ggplot2::aes(x = object$points$sq_skewness, y = object$points$kurtosis),
-                        color = "black", shape = 4, size = 1)
+                        color = "darkblue", shape = 4, size = 1)
 
   # Placeholder for hover functionality
   if (hover) {
     p <- highlight_point_on_hover(p)
   }
 
-  # Placeholder for bootstrap functionality
-  if (bootstrap) {
-    message("Bootstrap functionality is not implemented yet.")
+  return(p)
+}
+
+
+#' Generate Bootstrap Samples
+#'
+#' This function generates bootstrap samples from the provided input data.
+#' @param input_data A numeric vector or list of numeric vectors
+#' @param n_samples The number of bootstrap samples to generate
+#' @param sample_size The size of each bootstrap sample (default: same as the length of the input data)
+#' @return A list of bootstrap samples with calculated moments
+#' @export
+bootstrap_samples <- function(input_data, n_samples = 100, sample_size = NULL) {
+  # If the input_data is a list, process each vector
+  if (is.list(input_data)) {
+    bootstrap_list <- lapply(input_data, function(data) {
+      sample_size <- if (is.null(sample_size)) length(data) else sample_size
+      replicate(n_samples, cpp_calculate_moments(sample(data, sample_size, replace = TRUE)), simplify = FALSE)
+    })
+    # Flatten the list of lists into a single list of bootstrap results
+    return(do.call(c, bootstrap_list))
   }
 
-  return(p)
+  # If input_data is a single numeric vector
+  sample_size <- if (is.null(sample_size)) length(input_data) else sample_size
+  bootstrap_results <- replicate(n_samples, cpp_calculate_moments(sample(input_data, sample_size, replace = TRUE)), simplify = FALSE)
+
+  return(bootstrap_results)
+}
+
+#' Calculate Moments for Bootstrap Samples
+#'
+#' This function calculates skewness and kurtosis for each bootstrap sample.
+#' @param bootstrap_samples A list of numeric vectors representing bootstrap samples
+#' @return A data frame containing skewness and kurtosis for each sample
+#' @export
+calculate_bootstrap_moments <- function(bootstrap_samples) {
+  moments_list <- lapply(bootstrap_samples, cpp_calculate_moments)
+  moments_df <- do.call(rbind, lapply(moments_list, function(x) {
+    data.frame(sq_skewness = x$sq_skewness, kurtosis = x$kurtosis)
+  }))
+  return(moments_df)
 }
 
 

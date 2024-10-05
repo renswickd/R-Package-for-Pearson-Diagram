@@ -13,7 +13,6 @@ RoxygenNote: 7.3.2
 Imports:
     Rcpp (>= 1.0.6),
     ggplot2,
-    purrr,
     magrittr
 LinkingTo: 
     Rcpp
