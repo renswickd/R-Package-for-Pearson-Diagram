@@ -193,9 +193,23 @@ generate_area_data <- function() {
 #' @return Updated PearsonDiagram object with new points
 #' @export
 add_points_from_list <- function(object, input_list) {
+#   for (data in input_list) {
+#     moments <- cpp_calculate_moments(data)
+#     object <- add_point(object, sq_skewness = moments$sq_skewness, kurtosis = moments$kurtosis, distribution = "Input data")
+#   }
+#   return(object)
+# }
+  shape_index <- 1
+
   for (data in input_list) {
     moments <- cpp_calculate_moments(data)
-    object <- add_point(object, sq_skewness = moments$sq_skewness, kurtosis = moments$kurtosis, distribution = "Input data")
+    object <- add_point(
+      object,
+      sq_skewness = moments$sq_skewness,
+      kurtosis = moments$kurtosis,
+      distribution = paste0("Sample ", shape_index)
+    )
+    shape_index <- shape_index + 1
   }
   return(object)
 }
@@ -228,6 +242,49 @@ cpp_calculate_moments <- function(data) {
   list(sq_skewness = sk_kt[1]^2, kurtosis = sk_kt[2])
 }
 
+
+
+#' Generate Bootstrap Samples
+#'
+#' This function generates bootstrap samples from the provided input data.
+#' @param input_data A numeric vector or list of numeric vectors
+#' @param n_samples The number of bootstrap samples to generate
+#' @param sample_size The size of each bootstrap sample (default: same as the length of the input data)
+#' @return A list of bootstrap samples with calculated moments
+#' @export
+bootstrap_samples <- function(input_data, n_samples = 100, sample_size = NULL) {
+  # If the input_data is a list, process each vector
+  if (is.list(input_data)) {
+    bootstrap_list <- lapply(input_data, function(data) {
+      sample_size <- if (is.null(sample_size)) length(data) else sample_size
+      replicate(n_samples, cpp_calculate_moments(sample(data, sample_size, replace = TRUE)), simplify = FALSE)
+    })
+    # Flatten the list of lists into a single list of bootstrap results
+    return(do.call(c, bootstrap_list))
+  }
+
+  # If input_data is a single numeric vector
+  sample_size <- if (is.null(sample_size)) length(input_data) else sample_size
+  bootstrap_results <- replicate(n_samples, cpp_calculate_moments(sample(input_data, sample_size, replace = TRUE)), simplify = FALSE)
+
+  return(bootstrap_results)
+}
+
+#' Calculate Moments for Bootstrap Samples
+#'
+#' This function calculates skewness and kurtosis for each bootstrap sample.
+#' @param bootstrap_samples A list of numeric vectors representing bootstrap samples
+#' @return A data frame containing skewness and kurtosis for each sample
+#' @export
+calculate_bootstrap_moments <- function(bootstrap_samples) {
+  moments_list <- lapply(bootstrap_samples, cpp_calculate_moments)
+  moments_df <- do.call(rbind, lapply(moments_list, function(x) {
+    data.frame(sq_skewness = x$sq_skewness, kurtosis = x$kurtosis)
+  }))
+  return(moments_df)
+}
+
+
 #' Handle Outliers in the Data
 #'
 #' This function detects extreme values in a dataset based on z-scores.
@@ -244,14 +301,20 @@ handle_outliers <- function(data, threshold = 3) {
   return(list(cleaned_data = cleaned_data, num_outliers = num_outliers))
 }
 
-#' Highlight Points on Pearson Diagram
+#' Highlight Points on Pearson Diagram with Hover Information
 #'
-#' This function adds interactive tooltip functionality to Pearson diagram plots.
+#' This function adds interactive tooltip functionality to Pearson diagram plots using plotly.
 #'
-#' @param point A ggplot2 object with points plotted on it
-#' @return A modified ggplot2 object
+#' @param p A ggplot2 object with points plotted on it.
+#' @return A plotly object with added interactivity.
 #' @export
-highlight_point_on_hover <- function(point) {
-  # Placeholder function for future interactivity
-  return(point)
+highlight_point_on_hover <- function(p) {
+
+  # Convert ggplot to plotly for interactivity
+  interactive_plot <- plotly::ggplotly(
+    p,
+    tooltip = c("x", "y", "color","shape")
+  )
+
+  return(interactive_plot)
 }

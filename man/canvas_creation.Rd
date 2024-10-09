@@ -4,7 +4,42 @@
 \alias{canvas_creation}
 \title{Create Pearson Diagram Canvas}
 \usage{
-canvas_creation()
+canvas_creation(
+  title.font.family = "Arial",
+  title.font.size = 16,
+  title.font.color = "black",
+  title.hjust = NULL,
+  legend.font.family = "Arial",
+  legend.font.size = 12,
+  legend.font.color = "black",
+  legend.hjust = NULL,
+  axis.font.family = "Arial",
+  axis.font.size = 14,
+  axis.font.color = "black"
+)
+}
+\arguments{
+\item{title.font.family}{Font family of the plot title}
+
+\item{title.font.size}{Font size of the plot title}
+
+\item{title.font.color}{Font color of the plot title}
+
+\item{title.hjust}{alignment of the plot title}
+
+\item{legend.font.family}{Font family of the plot legend}
+
+\item{legend.font.size}{Font size of the plot legend}
+
+\item{legend.font.color}{Font color of the plot legend}
+
+\item{legend.hjust}{alignment of the plot legend}
+
+\item{axis.font.family}{Font family of the plot axis}
+
+\item{axis.font.size}{Font size of the plot axis}
+
+\item{axis.font.color}{Font color of the plot axis}
 }
 \value{
 A ggplot2 object representing the Pearson diagram canvas.
