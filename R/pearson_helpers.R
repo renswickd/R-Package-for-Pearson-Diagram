@@ -193,9 +193,23 @@ generate_area_data <- function() {
 #' @return Updated PearsonDiagram object with new points
 #' @export
 add_points_from_list <- function(object, input_list) {
+#   for (data in input_list) {
+#     moments <- cpp_calculate_moments(data)
+#     object <- add_point(object, sq_skewness = moments$sq_skewness, kurtosis = moments$kurtosis, distribution = "Input data")
+#   }
+#   return(object)
+# }
+  shape_index <- 1
+
   for (data in input_list) {
     moments <- cpp_calculate_moments(data)
-    object <- add_point(object, sq_skewness = moments$sq_skewness, kurtosis = moments$kurtosis, distribution = "Input data")
+    object <- add_point(
+      object,
+      sq_skewness = moments$sq_skewness,
+      kurtosis = moments$kurtosis,
+      distribution = paste0("Sample ", shape_index)
+    )
+    shape_index <- shape_index + 1
   }
   return(object)
 }
@@ -228,6 +242,49 @@ cpp_calculate_moments <- function(data) {
   list(sq_skewness = sk_kt[1]^2, kurtosis = sk_kt[2])
 }
 
+
+
+#' Generate Bootstrap Samples
+#'
+#' This function generates bootstrap samples from the provided input data.
+#' @param input_data A numeric vector or list of numeric vectors
+#' @param n_samples The number of bootstrap samples to generate
+#' @param sample_size The size of each bootstrap sample (default: same as the length of the input data)
+#' @return A list of bootstrap samples with calculated moments
+#' @export
+bootstrap_samples <- function(input_data, n_samples = 100, sample_size = NULL) {
+  # If the input_data is a list, process each vector
+  if (is.list(input_data)) {
+    bootstrap_list <- lapply(input_data, function(data) {
+      sample_size <- if (is.null(sample_size)) length(data) else sample_size
+      replicate(n_samples, cpp_calculate_moments(sample(data, sample_size, replace = TRUE)), simplify = FALSE)
+    })
+    # Flatten the list of lists into a single list of bootstrap results
+    return(do.call(c, bootstrap_list))
+  }
+
+  # If input_data is a single numeric vector
+  sample_size <- if (is.null(sample_size)) length(input_data) else sample_size
+  bootstrap_results <- replicate(n_samples, cpp_calculate_moments(sample(input_data, sample_size, replace = TRUE)), simplify = FALSE)
+
+  return(bootstrap_results)
+}
+
+#' Calculate Moments for Bootstrap Samples
+#'
+#' This function calculates skewness and kurtosis for each bootstrap sample.
+#' @param bootstrap_samples A list of numeric vectors representing bootstrap samples
+#' @return A data frame containing skewness and kurtosis for each sample
+#' @export
+calculate_bootstrap_moments <- function(bootstrap_samples) {
+  moments_list <- lapply(bootstrap_samples, cpp_calculate_moments)
+  moments_df <- do.call(rbind, lapply(moments_list, function(x) {
+    data.frame(sq_skewness = x$sq_skewness, kurtosis = x$kurtosis)
+  }))
+  return(moments_df)
+}
+
+
 #' Handle Outliers in the Data
 #'
 #' This function detects extreme values in a dataset based on z-scores.
@@ -244,14 +301,85 @@ handle_outliers <- function(data, threshold = 3) {
   return(list(cleaned_data = cleaned_data, num_outliers = num_outliers))
 }
 
-#' Highlight Points on Pearson Diagram
+#' Highlight Points on Pearson Diagram with Hover Information
 #'
-#' This function adds interactive tooltip functionality to Pearson diagram plots.
+#' This function adds interactive tooltip functionality to Pearson diagram plots using plotly.
 #'
-#' @param point A ggplot2 object with points plotted on it
-#' @return A modified ggplot2 object
+#' @param p A ggplot2 object with points plotted on it.
+#' @return A plotly object with added interactivity.
 #' @export
-highlight_point_on_hover <- function(point) {
-  # Placeholder function for future interactivity
-  return(point)
+highlight_point_on_hover <- function(p) {
+
+  # Convert ggplot to plotly for interactivity
+  interactive_plot <- plotly::ggplotly(
+    p,
+    tooltip = c("x", "y", "color","shape")
+  )
+
+  return(interactive_plot)
+}
+
+
+#' Summary Statistics for Numeric Inputs
+#'
+#' This function calculates summary statistics for numeric inputs, which can either be a numeric vector or a list of numeric vectors.
+#' The summary statistics include the number of observations, number of missing values, mean, median, and standard deviation.
+#'
+#' @param x A numeric vector or a list of numeric vectors for which the summary statistics are to be calculated.
+#' @param censored binary value indicating if the outliers are removed from the input
+#' @return A data frame containing the summary statistics. If the input is a vector, the row is labeled as "sample1".
+#'         If the input is a list, each row corresponds to a sample (e.g., "sample1", "sample2", etc.), and the summary statistics are computed for each vector.
+#' @export
+summary_stats <- function(x, censored) {
+  calc_summary <- function(vec) {
+    num_obs <- length(vec)                # Number of observations
+    num_missing <- sum(is.na(vec))        # Number of missing values
+    mean_val <- round(mean(vec, na.rm = TRUE),4)   # Mean
+    median_val <- round(stats::median(vec, na.rm = TRUE),4)  # Median
+    sd_val <- round(stats::sd(vec, na.rm = TRUE),4)       # Standard deviation
+    moments <- cpp_calculate_moments(vec)
+    skew_val <- round(moments$sq_skewness, 4)
+    kurt_val <- round(moments$kurtosis, 4)
+    return(c(num_obs, num_missing, mean_val, median_val, sd_val, skew_val, kurt_val))
+  }
+
+  results <- list()
+  if (is.numeric(x)) {
+    results[[1]] <- c("sample1", censored, calc_summary(x))
+  } else if (is.list(x)) {
+
+    for (i in seq_along(x)) {
+      if (is.numeric(x[[i]])) {
+        results[[i]] <- c(paste0("sample", i), censored, calc_summary(x[[i]]))
+      } else {
+        stop("All elements of the list must be numeric vectors.")
+      }
+    }
+  } else {
+    stop("Input must be a numeric vector or a list of numeric vectors.")
+  }
+  result_df <- as.data.frame(do.call(rbind, results), stringsAsFactors = FALSE)
+  colnames(result_df) <- c("input", "censored" ,"n", "n_missing", "mean", "median", "sd", "skewness", "kurtosis")
+  result_df[, 2:6] <- lapply(result_df[, 2:6], as.numeric)
+
+  return(result_df)
+}
+
+
+#' Ensure required Python dependencies are installed
+#'
+#' This function ensures that the necessary Python packages for rendering plots
+#' are installed (kaleido and plotly).
+#' It uses reticulate to install the packages via conda.
+#' @export
+ensure_python_dependencies <- function() {
+  if (!reticulate::py_module_available("kaleido")) {
+    message("Installing 'kaleido' via conda...")
+    reticulate::conda_install('r-reticulate', 'python-kaleido')
+  }
+
+  if (!reticulate::py_module_available("plotly")) {
+    message("Installing 'plotly' via conda...")
+    reticulate::conda_install('r-reticulate', 'plotly', channel = 'plotly')
+  }
 }

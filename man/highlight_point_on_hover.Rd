@@ -2,16 +2,16 @@
 % Please edit documentation in R/pearson_helpers.R
 \name{highlight_point_on_hover}
 \alias{highlight_point_on_hover}
-\title{Highlight Points on Pearson Diagram}
+\title{Highlight Points on Pearson Diagram with Hover Information}
 \usage{
-highlight_point_on_hover(point)
+highlight_point_on_hover(p)
 }
 \arguments{
-\item{point}{A ggplot2 object with points plotted on it}
+\item{p}{A ggplot2 object with points plotted on it.}
 }
 \value{
-A modified ggplot2 object
+A plotly object with added interactivity.
 }
 \description{
-This function adds interactive tooltip functionality to Pearson diagram plots.
+This function adds interactive tooltip functionality to Pearson diagram plots using plotly.
 }

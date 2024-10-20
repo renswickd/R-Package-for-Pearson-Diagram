@@ -8,8 +8,21 @@ plot_diagram(
   object,
   input_data = NULL,
   bootstrap = FALSE,
-  hover = FALSE,
-  treat.outliers = FALSE
+  hover = TRUE,
+  treat.outliers = FALSE,
+  summary.file = NULL,
+  plot.name = NULL,
+  title.font.family = "Arial",
+  title.font.size = 16,
+  title.font.color = "black",
+  title.hjust = NULL,
+  legend.font.family = "Arial",
+  legend.font.size = 12,
+  legend.font.color = "black",
+  legend.hjust = NULL,
+  axis.font.family = "Arial",
+  axis.font.size = 14,
+  axis.font.color = "black"
 )
 }
 \arguments{
@@ -19,9 +32,35 @@ plot_diagram(
 
 \item{bootstrap}{A boolean indicating whether to perform bootstrap analysis.}
 
-\item{hover}{A boolean indicating whether to add hover functionality (placeholder for now).}
+\item{hover}{A boolean indicating whether to add hover functionality.}
 
 \item{treat.outliers}{A boolean indicating whether to exclude extreme outliers (default is FALSE).}
+
+\item{summary.file}{Filename of the summary report}
+
+\item{plot.name}{Filename of the output plot}
+
+\item{title.font.family}{Font family of the plot title}
+
+\item{title.font.size}{Font size of the plot title}
+
+\item{title.font.color}{Font color of the plot title}
+
+\item{title.hjust}{alignment of the plot title}
+
+\item{legend.font.family}{Font family of the plot legend}
+
+\item{legend.font.size}{Font size of the plot legend}
+
+\item{legend.font.color}{Font color of the plot legend}
+
+\item{legend.hjust}{alignment of the plot legend}
+
+\item{axis.font.family}{Font family of the plot axis}
+
+\item{axis.font.size}{Font size of the plot axis}
+
+\item{axis.font.color}{Font color of the plot axis}
 }
 \value{
 A ggplot2 object representing the Pearson diagram.
