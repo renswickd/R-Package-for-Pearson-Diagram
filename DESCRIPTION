@@ -15,7 +15,9 @@ Imports:
     ggplot2,
     plotly,
     magrittr,
-    RColorBrewer
+    RColorBrewer,
+    utils,
+    reticulate
 LinkingTo: 
     Rcpp
 Suggests: 

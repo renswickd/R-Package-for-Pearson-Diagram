@@ -318,3 +318,68 @@ highlight_point_on_hover <- function(p) {
 
   return(interactive_plot)
 }
+
+
+#' Summary Statistics for Numeric Inputs
+#'
+#' This function calculates summary statistics for numeric inputs, which can either be a numeric vector or a list of numeric vectors.
+#' The summary statistics include the number of observations, number of missing values, mean, median, and standard deviation.
+#'
+#' @param x A numeric vector or a list of numeric vectors for which the summary statistics are to be calculated.
+#' @param censored binary value indicating if the outliers are removed from the input
+#' @return A data frame containing the summary statistics. If the input is a vector, the row is labeled as "sample1".
+#'         If the input is a list, each row corresponds to a sample (e.g., "sample1", "sample2", etc.), and the summary statistics are computed for each vector.
+#' @export
+summary_stats <- function(x, censored) {
+  calc_summary <- function(vec) {
+    num_obs <- length(vec)                # Number of observations
+    num_missing <- sum(is.na(vec))        # Number of missing values
+    mean_val <- round(mean(vec, na.rm = TRUE),4)   # Mean
+    median_val <- round(stats::median(vec, na.rm = TRUE),4)  # Median
+    sd_val <- round(stats::sd(vec, na.rm = TRUE),4)       # Standard deviation
+    moments <- cpp_calculate_moments(vec)
+    skew_val <- round(moments$sq_skewness, 4)
+    kurt_val <- round(moments$kurtosis, 4)
+    return(c(num_obs, num_missing, mean_val, median_val, sd_val, skew_val, kurt_val))
+  }
+
+  results <- list()
+  if (is.numeric(x)) {
+    results[[1]] <- c("sample1", censored, calc_summary(x))
+  } else if (is.list(x)) {
+
+    for (i in seq_along(x)) {
+      if (is.numeric(x[[i]])) {
+        results[[i]] <- c(paste0("sample", i), censored, calc_summary(x[[i]]))
+      } else {
+        stop("All elements of the list must be numeric vectors.")
+      }
+    }
+  } else {
+    stop("Input must be a numeric vector or a list of numeric vectors.")
+  }
+  result_df <- as.data.frame(do.call(rbind, results), stringsAsFactors = FALSE)
+  colnames(result_df) <- c("input", "censored" ,"n", "n_missing", "mean", "median", "sd", "skewness", "kurtosis")
+  result_df[, 2:6] <- lapply(result_df[, 2:6], as.numeric)
+
+  return(result_df)
+}
+
+
+#' Ensure required Python dependencies are installed
+#'
+#' This function ensures that the necessary Python packages for rendering plots
+#' are installed (kaleido and plotly).
+#' It uses reticulate to install the packages via conda.
+#' @export
+ensure_python_dependencies <- function() {
+  if (!reticulate::py_module_available("kaleido")) {
+    message("Installing 'kaleido' via conda...")
+    reticulate::conda_install('r-reticulate', 'python-kaleido')
+  }
+
+  if (!reticulate::py_module_available("plotly")) {
+    message("Installing 'plotly' via conda...")
+    reticulate::conda_install('r-reticulate', 'plotly', channel = 'plotly')
+  }
+}

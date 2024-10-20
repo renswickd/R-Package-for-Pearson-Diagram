@@ -128,6 +128,8 @@ canvas_creation <- function(title.font.family = "Arial", title.font.size = 16, t
 #' @param bootstrap A boolean indicating whether to perform bootstrap analysis.
 #' @param hover A boolean indicating whether to add hover functionality.
 #' @param treat.outliers A boolean indicating whether to exclude extreme outliers (default is FALSE).
+#' @param summary.file Filename of the summary report
+#' @param plot.name Filename of the output plot
 #' @param title.font.family Font family of the plot title
 #' @param title.font.size Font size of the plot title
 #' @param title.font.color Font color of the plot title
@@ -141,7 +143,7 @@ canvas_creation <- function(title.font.family = "Arial", title.font.size = 16, t
 #' @param axis.font.color Font color of the plot axis
 #' @return A ggplot2 object representing the Pearson diagram.
 #' @export
-plot_diagram <- function(object, input_data = NULL, bootstrap = FALSE, hover = FALSE, treat.outliers = FALSE,
+plot_diagram <- function(object, input_data = NULL, bootstrap = FALSE, hover = TRUE, treat.outliers = FALSE, summary.file = NULL, plot.name = NULL,
                          title.font.family = "Arial", title.font.size = 16, title.font.color = "black", title.hjust = NULL,
                          legend.font.family = "Arial", legend.font.size = 12, legend.font.color = "black", legend.hjust = NULL,
                          axis.font.family = "Arial", axis.font.size = 14, axis.font.color = "black") {
@@ -154,6 +156,7 @@ plot_diagram <- function(object, input_data = NULL, bootstrap = FALSE, hover = F
   # If input_data is provided, validate and add points to the PearsonDiagram object
   if (!is.null(input_data)) {
     validate_input(input_data)
+    summary_df <- summary_stats(input_data, 0)
 
     # Handle outliers if requested
     if (treat.outliers) {
@@ -166,12 +169,16 @@ plot_diagram <- function(object, input_data = NULL, bootstrap = FALSE, hover = F
           return(result$cleaned_data)
         })
         input_data <- cleaned_list
+        cleaned_summary_df <- summary_stats(input_data, 1)
+        summary_df <- rbind(summary_df, cleaned_summary_df)
       } else {
         result <- handle_outliers(input_data)
         if (result$num_outliers > 0) {
           warning(sprintf("Outliers detected and excluded: %d outliers removed from the dataset.", result$num_outliers))
         }
         input_data <- result$cleaned_data
+        # cleaned_summary_df <-
+        summary_df <- rbind(summary_df, summary_stats(input_data, 1))
       }
     }
 
@@ -196,13 +203,14 @@ plot_diagram <- function(object, input_data = NULL, bootstrap = FALSE, hover = F
                            legend.font.family, legend.font.size, legend.font.color, legend.hjust,
                            axis.font.family, axis.font.size, axis.font.color) +
         with(bootstrap_df, ggplot2::geom_point( ggplot2::aes(x = sq_skewness, y = kurtosis),
-                                                color = "yellow", alpha = 0.2, size = 1))
+                                                color = "yellow", alpha = 0.4, size = 1))
     }
   } else {
     p <- canvas_creation(title.font.family, title.font.size, title.font.color, title.hjust,
                          legend.font.family, legend.font.size, legend.font.color, legend.hjust,
                          axis.font.family, axis.font.size, axis.font.color)
   }
+
   plot_data = data.frame(object$points)
   plot_data$shape <- as.factor(22:(22+nrow(plot_data)-1))
   # print(plot_data)
@@ -257,6 +265,29 @@ plot_diagram <- function(object, input_data = NULL, bootstrap = FALSE, hover = F
   if (hover) {
     p <- highlight_point_on_hover(p_ggplot)
   }
+  print(summary_df)
+  # if (csv.file) {print("rens.csv")} #
+  if (!is.null(summary.file) && !grepl("\\.csv$", summary.file, ignore.case = TRUE)) {
+    summary.file <- paste0(summary.file, ".csv")
+    utils::write.csv(summary_df, summary.file)
+    message("Summary table is saved in the location: ", summary.file)
+  }
+
+  if (!is.null(plot.name)) {
+    # print("plot.name is not null")
+    ensure_python_dependencies()
+    # plotly::save_image(p, "./sample_output.pdf")
+
+    if (grepl("\\.pdf$", plot.name)) {
+      # plotly::kaleido(p, file = paste0(file.name, ".pdf"))
+      plotly::save_image(p, plot.name)
+    } else if (grepl("\\.png$", plot.name)) {
+      plotly::save_image(p, plot.name)
+    } else {
+      stop("Unsupported file type. Please use 'pdf' or 'png'.")
+    }
+  }
+
   return(p)
 }
 

@@ -8,8 +8,10 @@ plot_diagram(
   object,
   input_data = NULL,
   bootstrap = FALSE,
-  hover = FALSE,
+  hover = TRUE,
   treat.outliers = FALSE,
+  summary.file = NULL,
+  plot.name = NULL,
   title.font.family = "Arial",
   title.font.size = 16,
   title.font.color = "black",
@@ -33,6 +35,10 @@ plot_diagram(
 \item{hover}{A boolean indicating whether to add hover functionality.}
 
 \item{treat.outliers}{A boolean indicating whether to exclude extreme outliers (default is FALSE).}
+
+\item{summary.file}{Filename of the summary report}
+
+\item{plot.name}{Filename of the output plot}
 
 \item{title.font.family}{Font family of the plot title}
 
