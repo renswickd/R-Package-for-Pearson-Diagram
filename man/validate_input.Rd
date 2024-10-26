@@ -2,17 +2,16 @@
 % Please edit documentation in R/pearson_helpers.R
 \name{validate_input}
 \alias{validate_input}
-\title{Validate Input Data}
+\title{Validate Input (S3 Generic)}
 \usage{
-validate_input(data)
+validate_input(object)
 }
 \arguments{
-\item{data}{A numeric vector, a list of numeric vectors containing the data points, or a PearsonDiagram object.}
+\item{object}{The object to be validated, which could be a PearsonDiagram object, numeric vector, or list.}
 }
 \value{
-TRUE if the input is valid, otherwise stops with an error.
+TRUE if the input is valid, otherwise an error will be thrown.
 }
 \description{
-This function checks if the input data or PearsonDiagram object is valid.
-It validates numeric vectors or lists of numeric vectors for input data or a PearsonDiagram object with valid points data.
+This function serves as a generic method for validating inputs.
 }

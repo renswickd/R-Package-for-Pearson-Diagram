@@ -1,129 +1,9 @@
-#' Create a PearsonDiagram Object
-#'
-#' This function creates an empty PearsonDiagram object.
-#' The PearsonDiagram object is used to store sq_skewness, kurtosis values, and distribution.
-#'
-#' @return A PearsonDiagram object.
-#' @export
-#' @examples
-#' pd <- PearsonDiagram()
-PearsonDiagram <- function() {
-  structure(
-    list(points = data.frame(sq_skewness = numeric(), kurtosis = numeric(), distribution = character())),
-    class = "PearsonDiagram"
-  )
-}
-
-#' Add a point to the Pearson Diagram
-#'
-#' Adds a point with the given sq_skewness and kurtosis values.
-#'
-#' @param object PearsonDiagram object
-#' @param sq_skewness Square of skewness value of the distribution
-#' @param kurtosis Kurtosis value of the distribution
-#' @param distribution The name of the distribution
-#' @return Updated PearsonDiagram object with new points
-#' @export
-add_point <- function(object, sq_skewness, kurtosis, distribution=NA) {
-  UseMethod("add_point")
-}
-
-#' Add a point to the Pearson Diagram
-#'
-#' @param object PearsonDiagram object
-#' @param sq_skewness Square of skewness value of the distribution
-#' @param kurtosis Kurtosis value of the distribution
-#' @param distribution The name of the distribution
-#' @return Updated PearsonDiagram object with new points
-#' @export
-add_point.PearsonDiagram <- function(object, sq_skewness, kurtosis, distribution=NA) {
-  object$points <- rbind(
-    object$points,
-    data.frame(sq_skewness = sq_skewness, kurtosis = kurtosis, distribution = distribution)
-  )
-  return(object)
-}
-
-#' Create Pearson Diagram Canvas
-#'
-#' This function creates a Pearson diagram canvas with known distributions without any input data points.
-#' The canvas represents Normal, Exponential, Gamma, and Beta distributions.
-#'
-#' @param title.font.family Font family of the plot title
-#' @param title.font.size Font size of the plot title
-#' @param title.font.color Font color of the plot title
-#' @param title.hjust alignment of the plot title
-#' @param legend.font.family Font family of the plot legend
-#' @param legend.font.size Font size of the plot legend
-#' @param legend.font.color Font color of the plot legend
-#' @param legend.hjust alignment of the plot legend
-#' @param axis.font.family Font family of the plot axis
-#' @param axis.font.size Font size of the plot axis
-#' @param axis.font.color Font color of the plot axis
-#' @return A ggplot2 object representing the Pearson diagram canvas.
-#' @export
-canvas_creation <- function(title.font.family = "Arial", title.font.size = 16, title.font.color = "black", title.hjust=NULL,
-                            legend.font.family = "Arial", legend.font.size = 12, legend.font.color = "black", legend.hjust=NULL,
-                            axis.font.family = "Arial", axis.font.size = 14, axis.font.color = "black") {
-  # Generate known distributions' data
-  data <- generate_data()
-  area_data <- generate_area_data()
-  area_data_limit <- area_data$min_param1
-  area_data_region <- area_data$merged_data
-
-  point_data <- data[data$distribution %in% c("Normal", "Uniform", "Exponential"), ]
-  # exp_line_data <- data[data$distribution == "Exponential", ]
-  gamma_line_data <- data[data$distribution == "Gamma", ]
-  inv_gamma_line_data <- data[data$distribution == "Inverse Gamma", ]
-  # area_data <- data[data$distribution == "Beta", ]
-
-  # Create the canvas
-  p <- ggplot2::ggplot() +
-    with(gamma_line_data, ggplot2::geom_line(ggplot2::aes(x = sq_skewness, y = kurtosis, color = distribution), linewidth = 0.8)) +
-    with(inv_gamma_line_data, ggplot2::geom_line(ggplot2::aes(x = sq_skewness, y = kurtosis, color = distribution), linewidth = 0.8)) +
-    with(area_data_limit, ggplot2::geom_line(data = area_data_limit, ggplot2::aes(x = sq_skewness, y = kurtosis, color = "Beta"), linewidth = 0.8)) +
-    with(area_data_region, ggplot2::geom_ribbon(data = area_data_region,
-                                                ggplot2::aes(x = sq_skewness, ymin = kurtosis_min, ymax = kurtosis_max, fill = "Beta"),
-                                                alpha = 0.5)) +
-    with(point_data, ggplot2::geom_point(ggplot2::aes(x = sq_skewness, y = kurtosis, color = distribution), size = 5)) +
-
-    # Reverse the y-axis for Kurtosis
-    ggplot2::scale_y_reverse() +
-    ggplot2::scale_x_continuous(limits = c(0,6)) +
-
-    # Axis labels
-    ggplot2::xlab(expression(paste("Square of Skewness (", beta[1]^2, ")"))) +
-    ggplot2::ylab(expression(paste("Kurtosis (", beta[2], ")"))) +
-    ggplot2::theme_minimal() +
-
-    # Legend and title
-    ggplot2::labs(title = "Pearson Diagram") +
-    ggplot2::theme(
-      plot.title = ggplot2::element_text(family = title.font.family, color = title.font.color, size = title.font.size, hjust = title.hjust),
-      legend.title = ggplot2::element_text(family = legend.font.family, color = legend.font.color, size = legend.font.size, hjust = legend.hjust),
-      axis.title = ggplot2::element_text(family = axis.font.family, color = axis.font.color, size = axis.font.size)
-    )
-    # ggplot2::scale_color_manual(name = "Distributions",  # Custom legend title
-    #                             values = c("Normal" = "skyblue",
-    #                                        "Uniform" = "lightgreen",
-    #                                        "Exponential" = "lightcoral",
-    #                                        "Gamma" = "plum",
-    #                                        "Inverse Gamma" = "salmon",
-    #                                        "Beta" = "lightblue")) +
-    # ggplot2::scale_fill_manual(name= NULL, values = c("Beta" = "lightsalmon")) +
-    # ggplot2::scale_fill_manual(values = c("Beta" = "lightblue")) +
-
-
-  return(p)
-}
-
 #' Plot the Pearson Diagram with Input Data and Bootstrap Samples
 #'
 #' This function plots the Pearson diagram with known distributions and user-provided data points.
 #' It supports input_data as a numeric vector or a list of numeric vectors. For each input, it calculates the
 #' skewness and kurtosis and plots them on the canvas.
 #'
-#' @param object A PearsonDiagram object.
 #' @param input_data A numeric vector or a list of numeric vectors containing the data points (optional).
 #' @param bootstrap A boolean indicating whether to perform bootstrap analysis.
 #' @param hover A boolean indicating whether to add hover functionality.
@@ -142,11 +22,35 @@ canvas_creation <- function(title.font.family = "Arial", title.font.size = 16, t
 #' @param axis.font.size Font size of the plot axis
 #' @param axis.font.color Font color of the plot axis
 #' @return A ggplot2 object representing the Pearson diagram.
+#' # Example 1: Basic plot with a numeric vector
+#' data_vector <- c(1.2, 2.3, 3.4, 4.5, 5.6)
+#' plot_diagram(input_data = data_vector)
+#'
+#' # Example 2: Plot with a list of numeric vectors
+#' data_list <- list(c(1.1, 2.2, 3.3), c(2.2, 3.3, 4.4))
+#' plot_diagram(input_data = data_list)
+#'
+#' # Example 3: Plot with bootstrap analysis
+#' plot_diagram(input_data = data_vector, bootstrap = TRUE)
+#'
+#' # Example 4: Plot with outlier treatment
+#' noisy_data <- c(1, 2, 3, 100, 5, 6)
+#' plot_diagram(input_data = noisy_data, treat.outliers = TRUE, bootstrap = TRUE)
+#'
+#' # Example 5: Save summary report and plot
+#' plot_diagram(input_data = data_vector, summary.file = "summary.csv", plot.name = "pearson_diagram.png")
+#'
+#' # Example 6: Customizing fonts and plot appearance
+#' plot_diagram(input_data = data_vector,
+#'              title.font.family = "Arial", title.font.size = 20, title.font.color = "darkred",
+#'              legend.font.size = 14, axis.font.size = 12)
 #' @export
-plot_diagram <- function(object, input_data = NULL, bootstrap = FALSE, hover = TRUE, treat.outliers = FALSE, summary.file = NULL, plot.name = NULL,
+plot_diagram <- function(input_data = NULL, bootstrap = FALSE, hover = TRUE, treat.outliers = FALSE, summary.file = NULL, plot.name = NULL,
                          title.font.family = "Arial", title.font.size = 16, title.font.color = "black", title.hjust = NULL,
                          legend.font.family = "Arial", legend.font.size = 12, legend.font.color = "black", legend.hjust = NULL,
                          axis.font.family = "Arial", axis.font.size = 14, axis.font.color = "black") {
+
+  object <- PearsonDiagram()
   # Validate the PearsonDiagram object
   validate_input(object)
   p <- canvas_creation(title.font.family, title.font.size, title.font.color, title.hjust,

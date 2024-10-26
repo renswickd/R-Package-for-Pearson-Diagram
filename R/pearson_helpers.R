@@ -1,60 +1,86 @@
-#' Validate Input Data
+#' Validate Input (S3 Generic)
 #'
-#' This function checks if the input data or PearsonDiagram object is valid.
-#' It validates numeric vectors or lists of numeric vectors for input data or a PearsonDiagram object with valid points data.
-#'
-#' @param data A numeric vector, a list of numeric vectors containing the data points, or a PearsonDiagram object.
-#' @return TRUE if the input is valid, otherwise stops with an error.
+#' This function serves as a generic method for validating inputs.
+#' @param object The object to be validated, which could be a PearsonDiagram object, numeric vector, or list.
+#' @return TRUE if the input is valid, otherwise an error will be thrown.
 #' @export
-validate_input <- function(data) {
-  # Check if the data is a PearsonDiagram object
-  if (inherits(data, "PearsonDiagram")) {
-    if (!is.data.frame(data$points)) {
-      stop("Invalid PearsonDiagram object: 'points' must be a data frame.")
-    }
-    return(TRUE)
+validate_input <- function(object) {
+  UseMethod("validate_input")
+}
+
+#' Validate PearsonDiagram Object
+#'
+#' This function validates if a PearsonDiagram object has the correct structure.
+#' @param object A PearsonDiagram object
+#' @return TRUE if valid, otherwise throws an error
+#' @export
+validate_input.PearsonDiagram <- function(object) {
+  if (!is.data.frame(object$points)) {
+    stop("Invalid PearsonDiagram object: 'points' must be a data frame.")
   }
 
-  # If the input is a list, validate each element in the list
-  if (is.list(data)) {
-    for (vec in data) {
-      if (!is.numeric(vec)) {
-        stop("Each element in the list must be numeric.")
-      }
-      if (length(vec) < 3) {
-        stop("Each numeric vector must contain at least 3 data points.")
-      }
-      if (any(is.na(vec))) {
-        stop("Input contains missing values.")
-      }
-      if (any(is.infinite(vec))) {
-        stop("Input contains infinite values.")
-      }
-      if (stats::sd(vec) == 0) {
-        stop("Each numeric vector must have non-zero variance.")
-      }
-    }
-    return(TRUE)
+  # Check if the required columns exist in the data frame
+  if (!all(c("sq_skewness", "kurtosis", "distribution") %in% colnames(object$points))) {
+    stop("Invalid PearsonDiagram object: 'points' data frame must contain 'sq_skewness', 'kurtosis', and 'distribution' columns.")
   }
 
-  # Validate if the input is a single numeric vector
-  if (!is.numeric(data)) {
-    stop("Input data must be numeric.")
-  }
-  if (length(data) < 3) {
-    stop("Input data must contain at least 3 data points.")
-  }
-  if (any(is.na(data))) {
-    stop("Input contains missing values.")
-  }
-  if (any(is.infinite(data))) {
-    stop("Input contains infinite values.")
-  }
-  if (stats::sd(data) == 0) {
-    stop("Input data has zero variance, please provide more varied data.")
-  }
   return(TRUE)
 }
+
+#' Validate Numeric Vector
+#'
+#' This function checks if the input is a valid numeric vector with no missing values or zero variance.
+#' @param object A numeric vector
+#' @return TRUE if valid, otherwise throws an error
+#' @export
+validate_input.numeric <- function(object) {
+  if (!is.numeric(object)) {
+    stop("Input data must be numeric.")
+  }
+  if (length(object) < 3) {
+    stop("Input data must contain at least 3 data points.")
+  }
+  if (any(is.na(object))) {
+    stop("Input contains missing values.")
+  }
+  if (any(is.infinite(object))) {
+    stop("Input contains infinite values.")
+  }
+  if (stats::sd(object) == 0) {
+    stop("Input data has zero variance, please provide more varied data.")
+  }
+
+  return(TRUE)
+}
+
+#' Validate List of Numeric Vectors
+#'
+#' This function checks if the input is a valid list of numeric vectors, ensuring each element meets validation criteria.
+#' @param object A list of numeric vectors
+#' @return TRUE if valid, otherwise throws an error
+#' @export
+validate_input.list <- function(object) {
+  for (vec in object) {
+    if (!is.numeric(vec)) {
+      stop("Each element in the list must be numeric.")
+    }
+    if (length(vec) < 3) {
+      stop("Each numeric vector must contain at least 3 data points.")
+    }
+    if (any(is.na(vec))) {
+      stop("List contains missing values.")
+    }
+    if (any(is.infinite(vec))) {
+      stop("List contains infinite values.")
+    }
+    if (stats::sd(vec) == 0) {
+      stop("Each numeric vector must have non-zero variance.")
+    }
+  }
+
+  return(TRUE)
+}
+
 
 #' Calculate Skewness and Kurtosis for Known Distributions
 #'
@@ -147,7 +173,6 @@ calculate_moments <- function(distribution, params = list()) {
 #'
 #' This function generates skewness and kurtosis values for various known distributions using the calculate_moments function.
 #' @return A data frame containing skewness, kurtosis, and distribution names for multiple distributions.
-
 #' @export
 generate_data <- function() {
   normal_data <- calculate_moments("Normal")
@@ -179,39 +204,9 @@ generate_data <- function() {
 #'
 #' This function generates skewness and kurtosis values for known distributions representing area in pearson diagram using the calculate_moments function.
 #' @return A data frame containing skewness, kurtosis, and parameter space for multiple distributions.
-
 #' @export
 generate_area_data <- function() {
   return(calculate_moments("Beta", list(shape1=seq(0.48, 100, length.out = 100), shape2=seq(0.48, 100, length.out = 100))))
-}
-
-#' Add points to the Pearson Diagram from a list of datasets
-#'
-#' This function adds multiple points to the Pearson Diagram, calculated from the given list of datasets.
-#' @param object PearsonDiagram object
-#' @param input_list A list of numeric vectors representing datasets
-#' @return Updated PearsonDiagram object with new points
-#' @export
-add_points_from_list <- function(object, input_list) {
-#   for (data in input_list) {
-#     moments <- cpp_calculate_moments(data)
-#     object <- add_point(object, sq_skewness = moments$sq_skewness, kurtosis = moments$kurtosis, distribution = "Input data")
-#   }
-#   return(object)
-# }
-  shape_index <- 1
-
-  for (data in input_list) {
-    moments <- cpp_calculate_moments(data)
-    object <- add_point(
-      object,
-      sq_skewness = moments$sq_skewness,
-      kurtosis = moments$kurtosis,
-      distribution = paste0("Sample ", shape_index)
-    )
-    shape_index <- shape_index + 1
-  }
-  return(object)
 }
 
 #' Calculate Moments Using Rcpp for a List of Vectors
@@ -240,83 +235,6 @@ cpp_calculate_moments_for_list <- function(data_list) {
 cpp_calculate_moments <- function(data) {
   sk_kt <- cpp_calculate_skewness_kurtosis(data)
   list(sq_skewness = sk_kt[1]^2, kurtosis = sk_kt[2])
-}
-
-
-
-#' Generate Bootstrap Samples
-#'
-#' This function generates bootstrap samples from the provided input data.
-#' @param input_data A numeric vector or list of numeric vectors
-#' @param n_samples The number of bootstrap samples to generate
-#' @param sample_size The size of each bootstrap sample (default: same as the length of the input data)
-#' @return A list of bootstrap samples with calculated moments
-#' @export
-bootstrap_samples <- function(input_data, n_samples = 100, sample_size = NULL) {
-  # If the input_data is a list, process each vector
-  if (is.list(input_data)) {
-    bootstrap_list <- lapply(input_data, function(data) {
-      sample_size <- if (is.null(sample_size)) length(data) else sample_size
-      replicate(n_samples, cpp_calculate_moments(sample(data, sample_size, replace = TRUE)), simplify = FALSE)
-    })
-    # Flatten the list of lists into a single list of bootstrap results
-    return(do.call(c, bootstrap_list))
-  }
-
-  # If input_data is a single numeric vector
-  sample_size <- if (is.null(sample_size)) length(input_data) else sample_size
-  bootstrap_results <- replicate(n_samples, cpp_calculate_moments(sample(input_data, sample_size, replace = TRUE)), simplify = FALSE)
-
-  return(bootstrap_results)
-}
-
-#' Calculate Moments for Bootstrap Samples
-#'
-#' This function calculates skewness and kurtosis for each bootstrap sample.
-#' @param bootstrap_samples A list of numeric vectors representing bootstrap samples
-#' @return A data frame containing skewness and kurtosis for each sample
-#' @export
-calculate_bootstrap_moments <- function(bootstrap_samples) {
-  moments_list <- lapply(bootstrap_samples, cpp_calculate_moments)
-  moments_df <- do.call(rbind, lapply(moments_list, function(x) {
-    data.frame(sq_skewness = x$sq_skewness, kurtosis = x$kurtosis)
-  }))
-  return(moments_df)
-}
-
-
-#' Handle Outliers in the Data
-#'
-#' This function detects extreme values in a dataset based on z-scores.
-#' Values with z-scores above a specified threshold are considered outliers.
-#' @param data A numeric vector containing the data points.
-#' @param threshold Z-score threshold for detecting outliers (default: 3).
-#' @return A list containing the cleaned data (without outliers) and the number of detected outliers.
-#' @export
-handle_outliers <- function(data, threshold = 3) {
-  z_scores <- (data - mean(data)) / stats::sd(data)
-  outliers <- abs(z_scores) > threshold
-  cleaned_data <- data[!outliers]
-  num_outliers <- sum(outliers)
-  return(list(cleaned_data = cleaned_data, num_outliers = num_outliers))
-}
-
-#' Highlight Points on Pearson Diagram with Hover Information
-#'
-#' This function adds interactive tooltip functionality to Pearson diagram plots using plotly.
-#'
-#' @param p A ggplot2 object with points plotted on it.
-#' @return A plotly object with added interactivity.
-#' @export
-highlight_point_on_hover <- function(p) {
-
-  # Convert ggplot to plotly for interactivity
-  interactive_plot <- plotly::ggplotly(
-    p,
-    tooltip = c("x", "y", "color","shape")
-  )
-
-  return(interactive_plot)
 }
 
 
