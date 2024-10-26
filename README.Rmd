@@ -48,56 +48,20 @@ install.packages("renswickd/R-Package-for-Pearson-Diagram", repos = NULL, type =
 ## 1. Installation and loading the package
 Install the package from GitHub using the following command:
 
-``` {r}
-# devtools::install_github("renswickd/R-Package-for-Pearson-Diagram")
+``` 
+devtools::install_github("renswickd/R-Package-for-Pearson-Diagram")
 ```
 ## Getting Started
 Once installed, load the package and explore its main functions.
 ```{r}
 library(pearson.diagram)
 ```
+
 ### Main Function: plot_diagram
 The primary function for visualizing data on the Pearson Diagram is plot_diagram. It allows plotting both known distributions and user-defined data distributions. 
 
 * This is the main function that generates the Pearson diagram. It accepts a variety of input parameters, including a Pearson object, custom input data, and option to enable bootstrap functionality or hover-over interactivity.
 * If custom (unknown) data is provided, it calculates the square of skewness and kurtosis for the data points and highlights them on the plot. Otherwise, the function generates a pearson plot with known distribution families and no extra points.
-
-### Examples of plot_diagram
-#### Example 1: Basic usage with a numeric vector
-```{r, out.width="50%"}
-data_vector <- c(1.2, 2.3, 3.4, 4.5, 5.6)
-plot_diagram(input_data = data_vector, title.font.size = 18)
-```
-
-#### Example 2: Using a list of numeric vectors as input
-```{r, out.width="50%"}
-data_list <- list(c(1.1, 2.2, 3.3), c(2.2, 3.3, 4.4))
-plot_diagram(input_data = data_list, title.font.color = "blue")
-```
-
-#### Example 3: Enabling bootstrap analysis
-```{r, out.width="50%"}
-plot_diagram(input_data = data_vector, bootstrap = TRUE, title.font.family = "Helvetica")
-```
-
-#### Example 4: Treating outliers in the data
-```{r, out.width="50%"}
-noisy_data <- c(1, 2, 3, 100, 5, 6)
-plot_diagram(input_data = noisy_data, treat.outliers = TRUE)
-```
-
-#### Example 5: Saving summary and plot
-```{r, out.width="50%"}
-plot_diagram(input_data = data_vector, summary.file = "summary.csv", plot.name = "pearson_diagram.png")
-```
-
-#### Example 6: Customizing fonts and appearance
-```{r, out.width="50%"}
-plot_diagram(input_data = data_vector,
-             title.font.family = "Arial", title.font.size = 20, title.font.color = "darkred",
-             legend.font.size = 14, axis.font.size = 12)
-
-```
 
 
 ## Contributing
