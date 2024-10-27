@@ -50,6 +50,34 @@ plot_diagram <- function(input_data = NULL, bootstrap = FALSE, hover = TRUE, tre
                          legend.font.family = "Arial", legend.font.size = 12, legend.font.color = "black", legend.hjust = NULL,
                          axis.font.family = "Arial", axis.font.size = 14, axis.font.color = "black") {
 
+  # Custom parameter validation
+  validate_customization <- function(param, param_name, expected_type, condition = TRUE) {
+    if (!inherits(param, expected_type) || !condition) {
+      stop(paste("Invalid value for", param_name,
+                 "- expected", expected_type, "and valid value, got:", param))
+    }
+  }
+
+  # Validate title customization parameters
+  validate_customization(title.font.family, "title.font.family", "character")
+  validate_customization(title.font.size, "title.font.size", "numeric", title.font.size > 0)
+  validate_customization(title.font.color, "title.font.color", "character")
+  if (!is.null(title.hjust)) validate_customization(title.hjust, "title.hjust", "numeric", title.hjust >= 0 && title.hjust <= 1)
+
+  # Validate legend customization parameters
+  validate_customization(legend.font.family, "legend.font.family", "character")
+  validate_customization(legend.font.size, "legend.font.size", "numeric", legend.font.size > 0)
+  validate_customization(legend.font.color, "legend.font.color", "character")
+  if (!is.null(legend.hjust)) validate_customization(legend.hjust, "legend.hjust", "numeric", legend.hjust >= 0 && legend.hjust <= 1)
+
+  # Validate axis customization parameters
+  validate_customization(axis.font.family, "axis.font.family", "character")
+  validate_customization(axis.font.size, "axis.font.size", "numeric", axis.font.size > 0)
+  validate_customization(axis.font.color, "axis.font.color", "character")
+
+  if (!is.null(summary.file)) validate_customization(summary.file, "summary.file", "character")
+  if (!is.null(plot.name)) validate_customization(plot.name, "plot.name", "character")
+
   object <- PearsonDiagram()
   # Validate the PearsonDiagram object
   validate_input(object)
@@ -180,6 +208,8 @@ plot_diagram <- function(input_data = NULL, bootstrap = FALSE, hover = TRUE, tre
   if (!is.null(plot.name)) {
     # print("plot.name is not null")
     ensure_python_dependencies()
+    # reticulate::use_condaenv("r-reticulate", required = TRUE)  # Use your conda environment
+    # reticulate::py_config()
     # plotly::save_image(p, "./sample_output.pdf")
 
     if (grepl("\\.pdf$", plot.name)) {

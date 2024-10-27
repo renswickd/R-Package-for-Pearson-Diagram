@@ -294,6 +294,7 @@ ensure_python_dependencies <- function() {
   if (!reticulate::py_module_available("kaleido")) {
     message("Installing 'kaleido' via conda...")
     reticulate::conda_install('r-reticulate', 'python-kaleido')
+    message("DONE :: Installing 'kaleido' via conda...")
   }
 
   if (!reticulate::py_module_available("plotly")) {

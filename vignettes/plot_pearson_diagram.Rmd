@@ -46,12 +46,12 @@ canvas_creation()
 ## 2. Adding Input Data Points
 You can add custom input data to the diagram using the `plot_diagram()` function. The input can be a single numeric vector or a list of numeric vectors, which will be plotted as points on the Pearson diagram.
 
-### 2.1 Single Dataset Example
-Let’s first add a normally distributed dataset and visualize its skewness and kurtosis:
-```{r}
-data <- rnorm(1000) # Generate a random normal dataset
-plot_diagram(input_data = data) # Plot the Pearson diagram with this single dataset
-```
+<!-- ### 2.1 Single Dataset Example -->
+<!-- Let’s first add a normally distributed dataset and visualize its skewness and kurtosis: -->
+<!-- ```{r} -->
+<!-- data <- rnorm(1000) # Generate a random normal dataset -->
+<!-- plot_diagram(input_data = data) # Plot the Pearson diagram with this single dataset -->
+<!-- ``` -->
 
 ### 2.2 Multiple Datasets Example
 You can also provide multiple datasets (e.g., Normal, Gamma), and the function will calculate and plot each one:
@@ -76,11 +76,6 @@ data <- rnorm(1000) # Generate a random normal dataset
 plot_diagram(input_data = data, bootstrap = TRUE)
 ```
 
-```{r}
-data1 <- runif(1000)
-data2 <- rexp(100, rate = 1)
-plot_diagram(list(data1,data2), hover=TRUE, bootstrap = TRUE)
-```
 
 ## 5. Outlier detection 
 A basic level of identifying and providing appropriate warning regarding the extreme values of the input data will be developed in the further versions of the package.
@@ -88,9 +83,5 @@ A basic level of identifying and providing appropriate warning regarding the ext
 data1 <- c(rnorm(1000), rnorm(2, 10, 3))
 plot_diagram(data1, hover=TRUE, bootstrap = TRUE, treat.outliers = TRUE)
 ```
-
-
-
-
 
 
