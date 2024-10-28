@@ -6,70 +6,63 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The `pearson.diagram` package distinguishes different distribution by
-visualizing their skewness and kurtosis on a Pearson diagram. It helps
-users calculate skewness and kurtosis for unknown data distributions,
-plot the Pearson Diagram, and compare multiple distributions. This
-package leverages **Rcpp** for efficient computation and follows the
-**S3** object-oriented programming paradigm in R. This file provides a
-detailed guide on how to use the package, explains its backend
-functionality, and includes a test plan that can be followed to verify
-the package’s accuracy.
+## Overview
 
-## Key Features
-
-- **Display Pearson Diagrams:** Use a Pearson Diagram to view several
-  distributions by showing their skewness and kurtosis values for easy
-  comparison.
-
-- **Plotting Unknown Data:** Allows users to calculate and plot skewness
-  and kurtosis, which helps in the identification of the true
-  distribution.
-
-- **Bootstrapping Functionality:** (A placeholder for future
-  development) Users can generate bootstrap samples from their data and
-  plot variations of skewness and kurtosis on the diagram.
-
-- **Efficient Calculation with Rcpp:** Rcpp uses C++ to carry out
-  high-performance skewness and kurtosis calculations, enabling
-  efficient processing of huge datasets.
-
-- **Hovering Functionality:** The Interactive Hovering Feature allows
-  for user interactions by offering customized hover tooltips and
-  advanced visual feedback when interacting with Pearson Diagram points.
-
-- **S3 Object-Oriented Programming:** Implements functionality using S3
-  classes, encapsulating Pearson Diagrams as objects and providing
-  methods to add data points and plot the results in a structured,
-  object-oriented way.
-
-## 1. Installation and loading the package
-
-Install the package from GitHub using the following command:
-
-``` r
-# devtools::install_github("renswickd/R-Package-for-Pearson-Diagram")
-```
-
-Once installed, load the package:
-
-``` r
-library(pearson.diagram)
-```
-
-## 2. Overview of Main Functions
-
-### 2.1 `plot_diagram()` (Main Function)
-
-The Pearson diagram illustrates the relationship between the skewness
-and kurtosis of several probability distributions. The $x-\text{axis}$
-shows the square of skewness, while the $y-\text{axis}$ shows the
-kurtosis. This figure helps in visually identifying the properties of
-various distributions and how they fit in the skewness-kurtosis space.
+The `pearson.diagram` package provides tools to visualize different
+statistical distributions by plotting skewness and kurtosis values on a
+Pearson Diagram. This package is useful for comparing multiple
+distributions, calculating skewness and kurtosis for unknown data
+distributions, and identifying data characteristics in terms of central
+moments. The Pearson diagram illustrates the relationship between the
+skewness and kurtosis of several probability distributions. The
+$x-\text{axis}$ shows the square of skewness, while the $y-\text{axis}$
+shows the kurtosis. This figure helps in visually identifying the
+properties of various distributions and how they fit in the
+skewness-kurtosis space.
 
 Skewness $\beta_{1}=\mu_{3}^{2}/\mu_{2}^{3}$
 
 Kurtosis $\beta_{2}=\mu_{4}/\mu_{2}^{2}$
+
+Key features of the package include:
+
+- Plotting of known and user-defined distributions on a Pearson Diagram
+- Efficient skewness and kurtosis calculations using **Rcpp**
+- Bootstrap analysis to understand variability in skewness and kurtosis
+  estimates
+- Handling of extreme outliers for robust data visualization
+- Flexibility in customizing plot appearance
+
+The package follows the **S3** object-oriented programming paradigm for
+flexibility and extensibility.
+
+## Installation
+
+To install the `pearson.diagram` package, clone the repository and build
+the package using the following commands:
+
+``` r
+# Clone the repository from GitHub
+
+# Install the package
+install.packages("renswickd/R-Package-for-Pearson-Diagram", repos = NULL, type = "source")
+## 1. Installation and loading the package
+Install the package from GitHub using the following command:
+```
+
+devtools::install_github(“renswickd/R-Package-for-Pearson-Diagram”)
+
+    ## Getting Started
+    Once installed, load the package and explore its main functions.
+
+    ``` r
+    library(pearson.diagram)
+
+### Main Function: plot_diagram
+
+The primary function for visualizing data on the Pearson Diagram is
+plot_diagram. It allows plotting both known distributions and
+user-defined data distributions.
 
 - This is the main function that generates the Pearson diagram. It
   accepts a variety of input parameters, including a Pearson object,
@@ -80,53 +73,22 @@ Kurtosis $\beta_{2}=\mu_{4}/\mu_{2}^{2}$
   plot. Otherwise, the function generates a pearson plot with known
   distribution families and no extra points.
 
-``` r
-pd <- PearsonDiagram() # Create empty pearson diagram object
-data <- rnorm(10000) # Generate a random normal dataset
-plot_diagram(pd, input_data = data) # Plot the Pearson diagram with this single dataset
-```
+## Contributing
 
-<img src="man/figures/README-unnamed-chunk-4-1.png" width="50%" />
+If you find a bug or would like to request a feature, please create an
+issue on GitHub. Pull requests are welcome; please make sure that the
+code is thoroughly tested and documented.
 
-#### 2.1.1 `canvas_creation()`
+## License
 
-The `canvas_creation()` function builds the layout of the Pearson
-diagram. It contains known distribution families with three different
-sorts of representations:
+This package is licensed under the MIT License. See the LICENSE file for
+more details.
 
-- *Point Representation:* Normal and Uniform distributions are
-  represented by a single point since their skewness and kurtosis values
-  are fixed.
+## Acknowledgments
 
-- *Line Representation:* Exponential and Gamma distributions, whose
-  skewness and kurtosis vary with a parameter, are displayed as lines.
-
-- *Area Representation:* In Beta distributions, where multiple shape
-  parameters influence skewness and kurtosis, an area can be seen to
-  show a range of skewness and kurtosis values.
-
-``` r
-canvas_creation()
-```
-
-<img src="man/figures/README-unnamed-chunk-5-1.png" width="50%" />
-
-### 2.2 `cpp_calculate_moments()`
-
-This function calculates the skewness and kurtosis using
-high-performance Rcpp code. It is optimized to handle large datasets
-efficiently. It returns a list containing the square of skewness and
-kurtosis.
-
-``` r
-moments <- cpp_calculate_moments(data)
-print(moments)
-#> $sq_skewness
-#> [1] 0.0001432919
-#> 
-#> $kurtosis
-#> [1] 2.959693
-```
+The pearson.diagram package leverages Rcpp for high-performance
+computation and ggplot2 for flexible data visualization. We thank the R
+community for their invaluable support and resources.
 
 ### 2.3 `Object Oriented Programming`
 
@@ -148,175 +110,3 @@ functions are crucial for implementing OOP:
 
 - `plot_diagram.PearsonDiagram()` plots the Pearson diagram by
   dispatching based on the object’s class.
-
-### 2.4 `add_point()`
-
-The function`add_point()` inserts a point to the PearsonDiagram object.
-This point is distinguished by the square of skewness, kurtosis, and the
-optional distribution name. The point may indicate known distributions
-or custom data provided by the user.
-
-#### `Backend Functioning`:
-
-- For given distributions (5 distributions mentioned in section\[2.1\]),
-  analytical formulae are used to calculate the square of skewness and
-  kurtosis.
-- For unknown input data, the function uses the
-  `cpp_calculate_moments()` function to efficiently compute these
-  values.
-
-### 2.5 `validate_input()`
-
-The `validate_input()` function ensures that the user-provided data is
-valid. The function eliminates runtime issues by requiring valid input
-and ensuring accurate skewness and kurtosis computations. Below are the
-conditions validated by the function:
-
-- *Numeric:* The input data must be numeric.
-- *Length:* The input must contain at least 3 data points to allow for
-  meaningful calculations of skewness and kurtosis.
-- *Missing values:* The input must not contain NA or NaN values.
-- *Infinite values:* The input must not contain Inf or -Inf values.
-- *Zero variance:* The input data must have non-zero variance. Constant
-  data will not provide meaningful statistics for skewness or kurtosis.
-
-### 2.6 Customization (`highlight_point_on_hover()`)
-
-This function is currently implemented as a PLACEHOLDER, but upcoming
-versions will have extensive interactivity with the Pearson diagram.
-
-#### Planned Features:
-
-- Users will be able to hover over points in the diagram to see tooltips
-  with information such as skewness, kurtosis, and the distribution
-  name. Also, when user hover over various portions of the plot, user
-  can trigger actions like zooming in.
-- Beyond hovering over the plotted points, I aim to implement the plot
-  customization (including title, font, color etc.)
-- Aiming to enable the users to download the plot to specified directory
-  in local.
-
-### 2.7 Bootstrapping Functionality
-
-The `plot_diagram()` method has a bootstrapping option, which, if
-enabled, bootstraps the input data. Bootstrapping is the process of
-resampling input data using replacement to produce a large number of
-simulated samples. The resampled datasets are then used to estimate the
-skewness and kurtosis distributions.
-
-**Visualization:** Bootstrapped samples will be provided alongside the
-main data points, allowing users to view the variability and
-distribution of skewness and kurtosis for their input data.
-
-## 3. Example Workflow
-
-Here’s a complete example workflow to help you get started with the
-`pearson.diagram` package: Detailed examples and steps explained are
-available in the vignettes of the package.
-
-``` r
-pd <- PearsonDiagram()
-data1 <- rnorm(1000)            # Normal distribution
-data2 <- rgamma(1000, shape = 2) # Gamma distribution
-
-# Plot Pearson diagram with multiple datasets
-plot_diagram(pd, input_data = list(data1, data2))
-```
-
-<img src="man/figures/README-unnamed-chunk-7-1.png" width="50%" />
-
-## 4. Test Plan
-
-Testing the `pearson.diagram` package is critical to ensuring that its
-functionality works as expected, including basic functions such as
-calculating skewness and kurtosis, creating visualizations, processing
-user inputs, and maintaining the package’s performance under various
-conditions. The test plan is divided into two sections: implemented
-tests and yet-to-be implemented tests.
-
-### 4.1 Unit Testing
-
-##### 4.1.1 `plot_diagram()` - Validate that the function correctly plots the Pearson diagram with the correct visual representation of known and custom distributions.
-
-- *Test Input:* A `PearsonDiagram` object with points representing
-  Normal, Exponential, and Gamma distributions.
-- *Expected Result:* Correct plot with distinct representations (point,
-  line, area) for each distribution.
-- **Status: Implemented**
-
-``` r
-# refer (section [2.1], section [3])
-```
-
-##### 4.1.2 cpp_calculate_skewness_kurtosis() - Ensure that this function accurately calculates skewness and kurtosis for known distributions.
-
-- *Test Input:* A vector of random data from a standard normal
-  distribution.
-- *Expected Result:* Skewness close to 0 and kurtosis close to 3.
-- **Status: Implemented**
-
-``` r
-# refer (section [2.2])
-```
-
-##### 4.1.3 add_point() - Ensure that a point representing a distribution (given its skewness and kurtosis) is correctly added to the PearsonDiagram object.
-
-- *Test Input:* Skewness and kurtosis values for a known distribution
-  like Gamma.
-- *Expected Result:* Point added to the PearsonDiagram object with
-  accurate properties.
-- **Status: Implemented**
-
-##### 4.1.4 validate_input() - Ensure that the function correctly validates input datasets and raises appropriate error messages for invalid inputs (e.g., non-numeric data, missing values, infinite values).
-
-- *Test Input:* A vector / list containing NA values.
-- *Expected Result:* Error message indicating invalid input.
-- **Status: Implemented**
-
-### 4.2 Edge Case Testing
-
-##### 4.2.1 validate_input() - Validate that the function handles edge cases such as datasets with outliers or insufficient points.
-
-- *Test Input:* A constant numeric vector/list.
-- *Expected Result:* Error message indicating that the data has zero
-  variance.
-- **Status: Implemented**
-
-##### 4.2.2 `plot_diagram()` - Test edge cases where the PearsonDiagram object has no points or insufficient data.
-
-- *Test Input:* An empty PearsonDiagram object.
-- *Expected Result:* Error message stating that there are no points to
-  plot.
-- **Status: Implemented**
-
-### 4.3 Performance Testing
-
-##### 4.3.1 cpp_calculate_skewness_kurtosis() - Benchmark the performance of this function when processing large datasets, especially with C++ backend through Rcpp.
-
-- *Test Input:* Large numeric datasets with 10,000+ observations.
-- *Expected Result:* Fast and efficient calculation of skewness and
-  kurtosis.
-- **Status: Yet to be Implemented**
-
-##### 4.3.2 Stress Testing - Evaluate the behavior of the package under stress by processing very large or complex datasets.
-
-- *Test Input:* A combination of large datasets with varied
-  distributions (Normal, Exponential, Gamma).
-- *Expected Result:* Identify performance bottlenecks, memory usage
-  issues, or potential optimizations.
-- **Status: Yet to be Implemented**
-
-##### 4.3.3 `plot_diagram()` with Bootstrapping - Test the bootstrapping functionality to ensure that it correctly visualizes resampled distributions.
-
-- *Test Input:* Small numeric dataset with bootstrap = TRUE.
-- *Expected Result:* Bootstrapped samples visualized on the Pearson
-  diagram with correct representation of distribution variability.
-- **Status: Yet to be Implemented**
-
-### 4.4 Continuous Integration (Automated Testing)
-
-##### 4.4.1 Objective: Implement continuous integration (CI) using tools like testthat and set up pipelines for automatic testing of the package upon each commit or pull request.
-
-- Expected Outcome: CI will run unit tests automatically and flag any
-  issues caused by new code changes.
-- **Status: Yet to be implemented**
