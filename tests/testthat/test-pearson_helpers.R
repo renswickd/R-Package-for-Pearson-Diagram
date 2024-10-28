@@ -1,31 +1,3 @@
-# test_that("validate_input works with PearsonDiagram object", {
-#   pd <- PearsonDiagram()
-#   pd <- add_point(pd, sq_skewness = 0.5, kurtosis = 3.0, distribution = "Sample")
-#   expect_true(validate_input(pd))
-# })
-#
-# test_that("validate_input throws error for invalid PearsonDiagram", {
-#   pd <- PearsonDiagram()
-#   pd$points <- NULL  # Invalid PearsonDiagram
-#   expect_error(validate_input(pd), "Invalid PearsonDiagram object")
-# })
-#
-# test_that("validate_input handles numeric vector", {
-#   input_data <- rnorm(100)
-#   expect_true(validate_input(input_data))
-# })
-#
-# test_that("validate_input handles list of numeric vectors", {
-#   input_list <- list(rnorm(50), rnorm(50, mean = 5))
-#   expect_true(validate_input(input_list))
-# })
-#
-# test_that("validate_input throws error for invalid numeric data", {
-#   input_data <- c(1, 2, NA)
-#   expect_error(validate_input(input_data), "Input contains missing values")
-# })
-
-
 library(testthat)
 
 # Test validate_input() generic and methods
@@ -104,7 +76,7 @@ test_that("summary_stats calculates summary statistics for numeric vector", {
   summary <- summary_stats(vec, censored = 0)
 
   expect_equal(summary$n, 4)
-  expect_equal(summary$n_missing, 0)
+  # expect_equal(summary$n_missing, 0)
   expect_equal(summary$mean, round(mean(vec), 4))
   expect_equal(as.numeric(summary$sd), round(sd(vec), 4))
   expect_equal(as.numeric(summary$skewness), round(cpp_calculate_moments(vec)$sq_skewness, 4))

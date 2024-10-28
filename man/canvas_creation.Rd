@@ -15,7 +15,8 @@ canvas_creation(
   legend.hjust = NULL,
   axis.font.family = "Arial",
   axis.font.size = 14,
-  axis.font.color = "black"
+  axis.font.color = "black",
+  cb.friendly = FALSE
 )
 }
 \arguments{
@@ -40,6 +41,8 @@ canvas_creation(
 \item{axis.font.size}{Font size of the plot axis}
 
 \item{axis.font.color}{Font color of the plot axis}
+
+\item{cb.friendly}{Logical, if TRUE uses a colorblind-friendly palette}
 }
 \value{
 A ggplot2 object representing the Pearson diagram canvas.

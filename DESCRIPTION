@@ -15,7 +15,6 @@ Imports:
     ggplot2,
     plotly,
     magrittr,
-    RColorBrewer,
     utils,
     reticulate
 LinkingTo: 

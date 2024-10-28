@@ -185,11 +185,11 @@ generate_data <- function() {
   # }))
 
   # Gamma distribution for different shape parameters (line representation)
-  gamma_data <- do.call(rbind, lapply(seq(0.5, 20, by = 0.1), function(k) {
+  gamma_data <- do.call(rbind, lapply(seq(1, 500, length.out = 100), function(k) {
     calculate_moments("Gamma", list(shape = k))
   }))
 
-  inverse_gamma_data <- do.call(rbind, lapply(seq(6, 100, length.out = 1000), function(k) {
+  inverse_gamma_data <- do.call(rbind, lapply(seq(7.8, 2000, length.out = 100), function(k) {
     calculate_moments("Inverse Gamma", list(shape = k))
   }))
 
@@ -206,7 +206,7 @@ generate_data <- function() {
 #' @return A data frame containing skewness, kurtosis, and parameter space for multiple distributions.
 #' @export
 generate_area_data <- function() {
-  return(calculate_moments("Beta", list(shape1=seq(0.48, 100, length.out = 100), shape2=seq(0.48, 100, length.out = 100))))
+  return(calculate_moments("Beta", list(shape1=seq(0.94, 100, length.out = 10), shape2=seq(0.94, 100, length.out = 10))))
 }
 
 #' Calculate Moments Using Rcpp for a List of Vectors
@@ -251,14 +251,14 @@ cpp_calculate_moments <- function(data) {
 summary_stats <- function(x, censored) {
   calc_summary <- function(vec) {
     num_obs <- length(vec)                # Number of observations
-    num_missing <- sum(is.na(vec))        # Number of missing values
+    # num_missing <- sum(is.na(vec))        # Number of missing values
     mean_val <- round(mean(vec, na.rm = TRUE),4)   # Mean
     median_val <- round(stats::median(vec, na.rm = TRUE),4)  # Median
     sd_val <- round(stats::sd(vec, na.rm = TRUE),4)       # Standard deviation
     moments <- cpp_calculate_moments(vec)
     skew_val <- round(moments$sq_skewness, 4)
     kurt_val <- round(moments$kurtosis, 4)
-    return(c(num_obs, num_missing, mean_val, median_val, sd_val, skew_val, kurt_val))
+    return(c(num_obs, mean_val, median_val, sd_val, skew_val, kurt_val))
   }
 
   results <- list()
@@ -277,7 +277,7 @@ summary_stats <- function(x, censored) {
     stop("Input must be a numeric vector or a list of numeric vectors.")
   }
   result_df <- as.data.frame(do.call(rbind, results), stringsAsFactors = FALSE)
-  colnames(result_df) <- c("input", "censored" ,"n", "n_missing", "mean", "median", "sd", "skewness", "kurtosis")
+  colnames(result_df) <- c("input", "censored" ,"n", "mean", "median", "sd", "skewness", "kurtosis")
   result_df[, 2:6] <- lapply(result_df[, 2:6], as.numeric)
 
   return(result_df)

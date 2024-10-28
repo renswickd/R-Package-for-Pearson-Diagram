@@ -29,47 +29,33 @@ install_github("renswickd/R-Package-for-Pearson-Diagram")
 library(pearson.diagram)
 ```
 
-## 1. Creating the Pearson Diagram Canvas
-
-Before plotting, the first step is to create a canvas using the `create_canvas()` function. This sets up the base diagram showing different distribution families: (for the initial implementation these are the 5 distributions were visualized - Normal, Uniform, Exponential, Gamma and Beta)
-
-```{r}
-# Create a new PearsonDiagram object
-pd <- PearsonDiagram()
-pd
-```
-```{r}
-# Create the canvas without points
-canvas_creation()
-```
-
-## 2. Adding Input Data Points
+## 1. Adding Input Data Points
 You can add custom input data to the diagram using the `plot_diagram()` function. The input can be a single numeric vector or a list of numeric vectors, which will be plotted as points on the Pearson diagram.
 
-<!-- ### 2.1 Single Dataset Example -->
-<!-- Let’s first add a normally distributed dataset and visualize its skewness and kurtosis: -->
-<!-- ```{r} -->
-<!-- data <- rnorm(1000) # Generate a random normal dataset -->
-<!-- plot_diagram(input_data = data) # Plot the Pearson diagram with this single dataset -->
-<!-- ``` -->
+### 1.1 Single Dataset Example
+Let’s first add a normally distributed dataset and visualize its skewness and kurtosis:
+```{r}
+data <- rnorm(1000) # Generate a random normal dataset
+plot_diagram(input_data = data) # Plot the Pearson diagram with this single dataset
+```
 
-### 2.2 Multiple Datasets Example
+### 1.2 Multiple Datasets Example
 You can also provide multiple datasets (e.g., Normal, Gamma), and the function will calculate and plot each one:
 ```{r}
 data1 <- rnorm(1000)            # Normal distribution
-data2 <- rgamma(1000, shape = 2) # Gamma distribution1
+data2 <- rgamma(10000, shape = 2) # Gamma distribution1
 data3 <- rgamma(1000, shape = 1)   # Gamma distribution2
 
 # Plot the Pearson diagram with multiple datasets
 plot_diagram(input_data = list(data1, data2, data3))
 ```
-## 3. Using cpp_calculate_moments to Calculate Skewness and Kurtosis
+## 2. Using cpp_calculate_moments to Calculate Skewness and Kurtosis
 For custom datasets, you can use `cpp_calculate_moments()` to efficiently compute the skewness and kurtosis using a high-performance Rcpp implementation. Here's an example of using this function on a randomly generated dataset:
 ```{r}
 moments <- cpp_calculate_moments(data1)
 print(moments)
 ```
-## 4. Bootstrap Functionality
+## 3. Bootstrap Functionality
 The `plot_diagram(`) function also supports a bootstrap argument, which allows for bootstrapping the samples and calculate skewness and kurtosis for each samples when enabled. Although the current implementation has a placeholder for this functionality, it can be extended in future versions.
 ```{r}
 data <- rnorm(1000) # Generate a random normal dataset
@@ -77,7 +63,7 @@ plot_diagram(input_data = data, bootstrap = TRUE)
 ```
 
 
-## 5. Outlier detection 
+## 4. Outlier detection 
 A basic level of identifying and providing appropriate warning regarding the extreme values of the input data will be developed in the further versions of the package.
 ```{r}
 data1 <- c(rnorm(1000), rnorm(2, 10, 3))

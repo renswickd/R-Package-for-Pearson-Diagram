@@ -102,3 +102,11 @@ test_that("plot_diagram throws an error with invalid plot.name", {
     "Invalid value for plot.name - expected character"
   )
 })
+
+# test_that("plot_diagram throws an error for unsupported plot.name file type", {
+#   data_vector <- c(1.2, 2.3, 3.4, 4.5)
+#   expect_error(
+#     plot_diagram(input_data = data_vector, plot.name = "plot.bmp"),
+#     "Unsupported file type. Please use 'pdf' or 'png'."
+#   )
+# })

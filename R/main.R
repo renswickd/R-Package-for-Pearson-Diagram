@@ -21,6 +21,7 @@
 #' @param axis.font.family Font family of the plot axis
 #' @param axis.font.size Font size of the plot axis
 #' @param axis.font.color Font color of the plot axis
+#' @param cb.friendly Logical, if TRUE uses a colorblind-friendly palette
 #' @return A ggplot2 object representing the Pearson diagram.
 #' # Example 1: Basic plot with a numeric vector
 #' data_vector <- c(1.2, 2.3, 3.4, 4.5, 5.6)
@@ -48,7 +49,7 @@
 plot_diagram <- function(input_data = NULL, bootstrap = FALSE, hover = TRUE, treat.outliers = FALSE, summary.file = NULL, plot.name = NULL,
                          title.font.family = "Arial", title.font.size = 16, title.font.color = "black", title.hjust = NULL,
                          legend.font.family = "Arial", legend.font.size = 12, legend.font.color = "black", legend.hjust = NULL,
-                         axis.font.family = "Arial", axis.font.size = 14, axis.font.color = "black") {
+                         axis.font.family = "Arial", axis.font.size = 14, axis.font.color = "black", cb.friendly=FALSE) {
 
   # Custom parameter validation
   validate_customization <- function(param, param_name, expected_type, condition = TRUE) {
@@ -83,7 +84,7 @@ plot_diagram <- function(input_data = NULL, bootstrap = FALSE, hover = TRUE, tre
   validate_input(object)
   p <- canvas_creation(title.font.family, title.font.size, title.font.color, title.hjust,
                        legend.font.family, legend.font.size, legend.font.color, legend.hjust,
-                       axis.font.family, axis.font.size, axis.font.color)
+                       axis.font.family, axis.font.size, axis.font.color, cb.friendly)
 
   # If input_data is provided, validate and add points to the PearsonDiagram object
   if (!is.null(input_data)) {
@@ -131,16 +132,17 @@ plot_diagram <- function(input_data = NULL, bootstrap = FALSE, hover = TRUE, tre
       }))
 
       # Add bootstrap points to the plot
+      bootstrap_color = if (cb.friendly) "orange" else "yellow"
       p <- canvas_creation(title.font.family, title.font.size, title.font.color, title.hjust,
                            legend.font.family, legend.font.size, legend.font.color, legend.hjust,
-                           axis.font.family, axis.font.size, axis.font.color) +
+                           axis.font.family, axis.font.size, axis.font.color, cb.friendly) +
         with(bootstrap_df, ggplot2::geom_point( ggplot2::aes(x = sq_skewness, y = kurtosis),
-                                                color = "yellow", alpha = 0.4, size = 1))
+                                                color = bootstrap_color, alpha = 0.5, size = 1))
     }
   } else {
     p <- canvas_creation(title.font.family, title.font.size, title.font.color, title.hjust,
                          legend.font.family, legend.font.size, legend.font.color, legend.hjust,
-                         axis.font.family, axis.font.size, axis.font.color)
+                         axis.font.family, axis.font.size, axis.font.color, cb.friendly)
   }
 
   plot_data = data.frame(object$points)
@@ -160,23 +162,23 @@ plot_diagram <- function(input_data = NULL, bootstrap = FALSE, hover = TRUE, tre
       values = shapes,
       name = NULL
     ) +
-    ggplot2::scale_color_manual(
-      name = "Distributions",
-      values = c("Normal" = "orange",
-                 "Uniform" = "skyblue",
-                 "Exponential" = "blue",
-                 "Gamma" = "green",
-                 "Inverse Gamma" = "purple",
-                 "Beta" = "red"),
-      # ,
-      labels = function(x) gsub(",1,NA", "", x)  # Clean the labels
-      # values = RColorBrewer::brewer.pal(max(3, 6), "Set1"),
-      # labels = 1:6 #function(x) gsub(",1,NA", "", x)
-    ) +
-    ggplot2::scale_fill_manual(
-      name = NULL,
-      values = RColorBrewer::brewer.pal(max(3, 6), "Set2")
-    ) +
+    # ggplot2::scale_color_manual(
+    #   name = "Distributions",
+    #   values = c("Normal" = "orange",
+    #              "Uniform" = "skyblue",
+    #              "Exponential" = "blue",
+    #              "Gamma" = "green",
+    #              "Inverse Gamma" = "purple",
+    #              "Beta" = "red"),
+    #   # ,
+    #   labels = function(x) gsub(",1,NA", "", x)  # Clean the labels
+    #   # values = RColorBrewer::brewer.pal(max(3, 6), "Set1"),
+    #   # labels = 1:6 #function(x) gsub(",1,NA", "", x)
+    # ) +
+    # ggplot2::scale_fill_manual(
+    #   name = NULL,
+    #   values = c("Beta Area" = "red")#RColorBrewer::brewer.pal(max(3, 6), "Set2")
+    # ) +
     ggplot2::guides(
       color = ggplot2::guide_legend(title = "Distributions"),
       shape = ggplot2::guide_legend(title = NULL)
@@ -184,6 +186,10 @@ plot_diagram <- function(input_data = NULL, bootstrap = FALSE, hover = TRUE, tre
 
     # ggplot2::theme_minimal()
     # ggplot2::scale_shape_manual(values = distribution)
+  # p_ggplot <- p_ggplot +
+  #   ggplot2::scale_y_reverse(breaks = seq(1, max(plot_data$sq_skewness, na.rm = TRUE), by = 1)) +
+  #   ggplot2::xlab("Square of Skewness") +
+  #   ggplot2::ylab("Kurtosis")
 
   if (hover) {
     p_ggplot <- p_ggplot + ggplot2::xlab("Square of Skewness") +
@@ -215,8 +221,10 @@ plot_diagram <- function(input_data = NULL, bootstrap = FALSE, hover = TRUE, tre
     if (grepl("\\.pdf$", plot.name)) {
       # plotly::kaleido(p, file = paste0(file.name, ".pdf"))
       plotly::save_image(p, plot.name)
+      message("Plot is saved as a PDF file in the location: ", plot.name)
     } else if (grepl("\\.png$", plot.name)) {
       plotly::save_image(p, plot.name)
+      message("Plot is saved as a PNG file in the location: ", plot.name)
     } else {
       stop("Unsupported file type. Please use 'pdf' or 'png'.")
     }
