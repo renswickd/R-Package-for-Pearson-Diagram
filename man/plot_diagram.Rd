@@ -2,12 +2,11 @@
 % Please edit documentation in R/main.R
 \name{plot_diagram}
 \alias{plot_diagram}
-\title{Plot the Pearson Diagram with Input Data and Bootstrap Samples}
+\title{Plot the Pearson Diagram for Unknown Data}
 \usage{
 plot_diagram(
   input_data = NULL,
   bootstrap = FALSE,
-  hover = TRUE,
   treat.outliers = FALSE,
   summary.file = NULL,
   plot.name = NULL,
@@ -29,8 +28,6 @@ plot_diagram(
 \item{input_data}{A numeric vector or a list of numeric vectors containing the data points (optional).}
 
 \item{bootstrap}{A boolean indicating whether to perform bootstrap analysis.}
-
-\item{hover}{A boolean indicating whether to add hover functionality.}
 
 \item{treat.outliers}{A boolean indicating whether to exclude extreme outliers (default is FALSE).}
 
@@ -64,6 +61,13 @@ plot_diagram(
 }
 \value{
 A ggplot2 object representing the Pearson diagram.
+}
+\description{
+This function plots the Pearson diagram with known distributions and user-provided data points.
+It supports input_data as a numeric vector or a list of numeric vectors. For each input, it calculates the
+skewness and kurtosis and plots them on the canvas.
+}
+\examples{
 # Example 1: Basic plot with a numeric vector
 data_vector <- c(1.2, 2.3, 3.4, 4.5, 5.6)
 plot_diagram(input_data = data_vector)
@@ -79,16 +83,8 @@ plot_diagram(input_data = data_vector, bootstrap = TRUE)
 noisy_data <- c(1, 2, 3, 100, 5, 6)
 plot_diagram(input_data = noisy_data, treat.outliers = TRUE, bootstrap = TRUE)
 
-# Example 5: Save summary report and plot
-plot_diagram(input_data = data_vector, summary.file = "summary.csv", plot.name = "pearson_diagram.png")
-
-# Example 6: Customizing fonts and plot appearance
+# Example 5: Customizing fonts and plot appearance
 plot_diagram(input_data = data_vector,
              title.font.family = "Arial", title.font.size = 20, title.font.color = "darkred",
              legend.font.size = 14, axis.font.size = 12)
-}
-\description{
-This function plots the Pearson diagram with known distributions and user-provided data points.
-It supports input_data as a numeric vector or a list of numeric vectors. For each input, it calculates the
-skewness and kurtosis and plots them on the canvas.
 }

@@ -1,4 +1,4 @@
-#' Plot the Pearson Diagram with Input Data and Bootstrap Samples
+#' Plot the Pearson Diagram for Unknown Data
 #'
 #' This function plots the Pearson diagram with known distributions and user-provided data points.
 #' It supports input_data as a numeric vector or a list of numeric vectors. For each input, it calculates the
@@ -6,7 +6,6 @@
 #'
 #' @param input_data A numeric vector or a list of numeric vectors containing the data points (optional).
 #' @param bootstrap A boolean indicating whether to perform bootstrap analysis.
-#' @param hover A boolean indicating whether to add hover functionality.
 #' @param treat.outliers A boolean indicating whether to exclude extreme outliers (default is FALSE).
 #' @param summary.file Filename of the summary report
 #' @param plot.name Filename of the output plot
@@ -23,6 +22,7 @@
 #' @param axis.font.color Font color of the plot axis
 #' @param cb.friendly Logical, if TRUE uses a colorblind-friendly palette
 #' @return A ggplot2 object representing the Pearson diagram.
+#' @examples
 #' # Example 1: Basic plot with a numeric vector
 #' data_vector <- c(1.2, 2.3, 3.4, 4.5, 5.6)
 #' plot_diagram(input_data = data_vector)
@@ -38,15 +38,12 @@
 #' noisy_data <- c(1, 2, 3, 100, 5, 6)
 #' plot_diagram(input_data = noisy_data, treat.outliers = TRUE, bootstrap = TRUE)
 #'
-#' # Example 5: Save summary report and plot
-#' plot_diagram(input_data = data_vector, summary.file = "summary.csv", plot.name = "pearson_diagram.png")
-#'
-#' # Example 6: Customizing fonts and plot appearance
+#' # Example 5: Customizing fonts and plot appearance
 #' plot_diagram(input_data = data_vector,
 #'              title.font.family = "Arial", title.font.size = 20, title.font.color = "darkred",
 #'              legend.font.size = 14, axis.font.size = 12)
 #' @export
-plot_diagram <- function(input_data = NULL, bootstrap = FALSE, hover = TRUE, treat.outliers = FALSE, summary.file = NULL, plot.name = NULL,
+plot_diagram <- function(input_data = NULL, bootstrap = FALSE, treat.outliers = FALSE, summary.file = NULL, plot.name = NULL,
                          title.font.family = "Arial", title.font.size = 16, title.font.color = "black", title.hjust = NULL,
                          legend.font.family = "Arial", legend.font.size = 12, legend.font.color = "black", legend.hjust = NULL,
                          axis.font.family = "Arial", axis.font.size = 14, axis.font.color = "black", cb.friendly=FALSE) {
@@ -80,6 +77,7 @@ plot_diagram <- function(input_data = NULL, bootstrap = FALSE, hover = TRUE, tre
   if (!is.null(plot.name)) validate_customization(plot.name, "plot.name", "character")
 
   object <- PearsonDiagram()
+  hover <- TRUE
   # Validate the PearsonDiagram object
   validate_input(object)
   p <- canvas_creation(title.font.family, title.font.size, title.font.color, title.hjust,
@@ -147,10 +145,7 @@ plot_diagram <- function(input_data = NULL, bootstrap = FALSE, hover = TRUE, tre
 
   plot_data = data.frame(object$points)
   plot_data$shape <- as.factor(22:(22+nrow(plot_data)-1))
-  # print(plot_data)
   shapes <- c(21, 22, 23, 24, 25, 26)
-  # n_input <- function(input) if (is.list(input)) length(input) else if (is.vector(input)) 1
-  # n <- n_input(input_data)
   p_ggplot <- p + with(plot_data, ggplot2::geom_point(data = plot_data, #object$points,
                                                       ggplot2::aes(
                                                         x = sq_skewness,
@@ -162,34 +157,10 @@ plot_diagram <- function(input_data = NULL, bootstrap = FALSE, hover = TRUE, tre
       values = shapes,
       name = NULL
     ) +
-    # ggplot2::scale_color_manual(
-    #   name = "Distributions",
-    #   values = c("Normal" = "orange",
-    #              "Uniform" = "skyblue",
-    #              "Exponential" = "blue",
-    #              "Gamma" = "green",
-    #              "Inverse Gamma" = "purple",
-    #              "Beta" = "red"),
-    #   # ,
-    #   labels = function(x) gsub(",1,NA", "", x)  # Clean the labels
-    #   # values = RColorBrewer::brewer.pal(max(3, 6), "Set1"),
-    #   # labels = 1:6 #function(x) gsub(",1,NA", "", x)
-    # ) +
-    # ggplot2::scale_fill_manual(
-    #   name = NULL,
-    #   values = c("Beta Area" = "red")#RColorBrewer::brewer.pal(max(3, 6), "Set2")
-    # ) +
     ggplot2::guides(
       color = ggplot2::guide_legend(title = "Distributions"),
       shape = ggplot2::guide_legend(title = NULL)
-    ) #+
-
-    # ggplot2::theme_minimal()
-    # ggplot2::scale_shape_manual(values = distribution)
-  # p_ggplot <- p_ggplot +
-  #   ggplot2::scale_y_reverse(breaks = seq(1, max(plot_data$sq_skewness, na.rm = TRUE), by = 1)) +
-  #   ggplot2::xlab("Square of Skewness") +
-  #   ggplot2::ylab("Kurtosis")
+    )
 
   if (hover) {
     p_ggplot <- p_ggplot + ggplot2::xlab("Square of Skewness") +
