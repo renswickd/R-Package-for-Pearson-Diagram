@@ -2,7 +2,7 @@
 % Please edit documentation in R/main.R
 \name{plot_diagram}
 \alias{plot_diagram}
-\title{Plot the Pearson Diagram for Unknown Data}
+\title{Plot the Pearson Diagram}
 \usage{
 plot_diagram(
   input_data = NULL,
