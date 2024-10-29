@@ -45,18 +45,16 @@ the package using the following commands:
 # Clone the repository from GitHub
 
 # Install the package
-install.packages("renswickd/R-Package-for-Pearson-Diagram", repos = NULL, type = "source")
-## 1. Installation and loading the package
-Install the package from GitHub using the following command:
+devtools::install_github("renswickd/R-Package-for-Pearson-Diagram")
 ```
 
-devtools::install_github(“renswickd/R-Package-for-Pearson-Diagram”)
+## Getting Started
 
-    ## Getting Started
-    Once installed, load the package and explore its main functions.
+Once installed, load the package and explore its main functions.
 
-    ``` r
-    library(pearson.diagram)
+``` r
+library(pearson.diagram)
+```
 
 ### Main Function: plot_diagram
 
@@ -89,24 +87,3 @@ more details.
 The pearson.diagram package leverages Rcpp for high-performance
 computation and ggplot2 for flexible data visualization. We thank the R
 community for their invaluable support and resources.
-
-### 2.3 `Object Oriented Programming`
-
-The `pearson.diagram` package utilizes OOP approach using R S3 classes.
-This gives for greater flexibility when it comes to adding custom data
-points and customizing plot characteristics. By designing the package in
-such a way, it is easier to expand or modify the behavior of each
-function for different kinds of data and objects. The following
-functions are crucial for implementing OOP:
-
-- `PearsonDiagram()`: Creates an object of the `PearsonDiagram` class
-  containing information on values required to create the canvas and
-  plot the points such as square of skewness, kurtosis, and the
-  distribution name.
-
-- `add_point.PearsonDiagram()`: Uses the dispatch function to add points
-  to the `PearsonDiagram` object. This method allows users to add
-  additional data to the object in a systematic manner.
-
-- `plot_diagram.PearsonDiagram()` plots the Pearson diagram by
-  dispatching based on the object’s class.

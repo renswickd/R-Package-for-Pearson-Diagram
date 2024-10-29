@@ -1,4 +1,4 @@
-#' Plot the Pearson Diagram for Unknown Data
+#' Plot the Pearson Diagram
 #'
 #' This function plots the Pearson diagram with known distributions and user-provided data points.
 #' It supports input_data as a numeric vector or a list of numeric vectors. For each input, it calculates the
